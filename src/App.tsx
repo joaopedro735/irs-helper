@@ -10,7 +10,7 @@ function App() {
   const [isDark, setIsDark] = useState(() => {
     const stored = localStorage.getItem('irs-helper-theme');
     if (stored) return stored === 'dark';
-    return true; // Default to dark
+    return false; // Default to light
   });
 
   useEffect(() => {
