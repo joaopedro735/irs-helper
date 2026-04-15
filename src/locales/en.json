@@ -82,12 +82,12 @@
       "subtitle": "Other Investment Income"
     },
     "totals": {
-      "gross_income": "Gross Income (RendimentoBruto)",
+      "gross_income": "Gross Income",
       "tax_paid_abroad": "Tax Paid Abroad",
       "realisation_value": "Realisation Value",
       "acquisition_value": "Acquisition Value",
       "expenses_charges": "Expenses & Charges",
-      "net_income": "Net Income (RendimentoLiquido)"
+      "net_income": "Net Income"
     }
   },
   "diff": {
