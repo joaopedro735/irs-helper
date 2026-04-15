@@ -42,7 +42,7 @@
     "brokers_description": "Upload PDF reports from your brokers to extract financial data.",
     "xtb_lane": "XTB",
     "xtb_gains": "Capital Gains PDF",
-    "xtb_dividends": "Dividends PDF",
+    "xtb_dividends": "Dividends and Interest PDF",
     "tr_lane": "Trade Republic",
     "tr_report": "Tax Report PDF",
     "optional": "(Optional)",

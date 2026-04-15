@@ -5,7 +5,7 @@ O processo é simples e tem três passos.
 A aplicação funciona totalmente no seu computador. Nenhum ficheiro é enviado para servidores, por isso pode até desligar a internet e continuar a usá-la.
 
 ## Passo 1: Obter e carregar o ficheiro XML do IRS
-1. Aceda ao [Portal das Finanças para a entrega do IRS de 2026](https://irs.portaldasfinancas.gov.pt/app/entrega/v2026).
+1. Aceda ao [Portal das Finanças para a entrega do IRS de 2025](https://irs.portaldasfinancas.gov.pt/app/entrega/v2026).
 2. Escolha a opção "Obtenção de uma declaração pré-preenchida".
 3. Clique em "Validar" e corrija todos os erros.
 4. Quando a declaração já não apresentar erros, abra a opção "Anexos", no canto superior esquerdo.
@@ -21,7 +21,7 @@ A aplicação funciona totalmente no seu computador. Nenhum ficheiro é enviado 
 
 ## Passo 3: Rever, descarregar e importar o ficheiro
 1. Descarregue o ficheiro enriquecido e guarde-o no seu computador.
-2. Volte ao [Portal das Finanças para a entrega do IRS de 2026](https://irs.portaldasfinancas.gov.pt/app/entrega/v2026).
+2. Volte ao [Portal das Finanças para a entrega do IRS de 2025](https://irs.portaldasfinancas.gov.pt/app/entrega/v2026).
 3. Escolha a opção "Leitura de uma declaração previamente gravada num ficheiro".
 4. Selecione o ficheiro gerado pelo IRS Helper.
 5. Os valores dos relatórios devem agora aparecer na sua declaração online. Valide os valores manualmente.
