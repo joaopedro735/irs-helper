@@ -1,12 +1,27 @@
 # Como o IRS Helper Funciona
 
-Esta secao explica o processo de enriquecimento da declaracao de IRS em tres passos simples:
+O processo é simples e tem três passos.
 
-## Passo 1: Carregar o ficheiro XML
-Comece por carregar o ficheiro XML oficial da sua declaracao de IRS. Este ficheiro fornece a estrutura e os campos obrigatorios para a Autoridade Tributaria.
+A aplicação funciona totalmente no seu computador. Nenhum ficheiro é enviado para servidores, por isso pode até desligar a internet e continuar a usá-la.
 
-## Passo 2: Carregar os relatorios PDF (Mais-valias e Dividendos)
-De seguida, carregue todos os relatorios PDF relevantes das suas corretoras (XTB, Trade Republic). A aplicacao analisa automaticamente estes documentos para extrair tabelas estruturadas com as suas transacoes financeiras (mais-valias/dividendos).
+## Passo 1: Obter e carregar o ficheiro XML do IRS
+1. Aceda ao [Portal das Finanças para a entrega do IRS de 2026](https://irs.portaldasfinancas.gov.pt/app/entrega/v2026).
+2. Escolha a opção "Obtenção de uma declaração pré-preenchida".
+3. Clique em "Validar" e corrija todos os erros.
+4. Quando a declaração já não apresentar erros, abra a opção "Anexos", no canto superior esquerdo.
+5. Adicione os anexos G e J.
+6. Clique em "Gravar" e guarde o ficheiro XML no seu computador.
+7. Carregue esse ficheiro no IRS Helper. Este XML serve de base ao preenchimento automático e contém a estrutura e os campos obrigatórios exigidos pela Autoridade Tributária.
 
-## Passo 3: Enriquecimento e Download
-A aplicacao combina os dados. Mapeia de forma inteligente as linhas de transacoes extraidas para os campos corretos do seu XML de declaracao. Depois, pode usar o **Diff Viewer** para confirmar a precisao e descarregar o ficheiro enriquecido para entrega.
+## Passo 2: Carregar os relatórios PDF (mais-valias e dividendos)
+1. Carregue todos os relatórios PDF relevantes das suas corretoras. Neste momento, são suportadas a XTB e a Trade Republic (alguns valores ainda não são importados, valide as limitações na página principal).
+2. Clique em "Gerar Ficheiro de Importação IRS".
+3. A aplicação analisa automaticamente os documentos e extrai tabelas estruturadas com as suas transações financeiras.
+4. No fim, pode consultar um pequeno relatório e um comparador para confirmar as alterações feitas ao ficheiro XML.
+
+## Passo 3: Rever, descarregar e importar o ficheiro
+1. Descarregue o ficheiro enriquecido e guarde-o no seu computador.
+2. Volte ao [Portal das Finanças para a entrega do IRS de 2026](https://irs.portaldasfinancas.gov.pt/app/entrega/v2026).
+3. Escolha a opção "Leitura de uma declaração previamente gravada num ficheiro".
+4. Selecione o ficheiro gerado pelo IRS Helper.
+5. Os valores dos relatórios devem agora aparecer na sua declaração online. Valide os valores manualmente.
