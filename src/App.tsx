@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { HomePage } from './components/HomePage';
 import { HowItWorksPage } from './components/HowItWorksPage';
-import { Languages, Info, Sun, Moon } from 'lucide-react';
+import { Languages, Sun, Moon } from 'lucide-react';
+import { FaGithub } from 'react-icons/fa';
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -28,10 +29,6 @@ function App() {
           <p className="subtitle">{t('app.subtitle')}</p>
         </div>
         <div className="header__actions">
-          <Link to="/how-it-works" className="nav-button">
-            <Info size={18} />
-            {t('app.how_it_works')}
-          </Link>
           <button
             className="theme-toggle"
             onClick={toggleTheme}
@@ -59,6 +56,20 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/how-it-works" element={<HowItWorksPage />} />
       </Routes>
+
+      <footer className="app-footer">
+        <a
+          href="https://github.com/almeiduh/irs-helper"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="app-footer__link"
+          aria-label="GitHub repository"
+        >
+          <FaGithub size={16} aria-hidden="true" />
+          <span>GitHub Repository</span>
+        </a>
+        <span className="app-footer__author">Diogo Almeida</span>
+      </footer>
     </div>
   );
 }

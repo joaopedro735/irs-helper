@@ -88,6 +88,37 @@ body {
   width: 100%;
 }
 
+.app-footer {
+  margin-top: 2.25rem;
+  padding: 1rem 0 0.25rem;
+  border-top: 1px solid var(--panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.app-footer__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--link-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.app-footer__link:hover,
+.app-footer__link:focus-visible {
+  color: var(--link-hover-color);
+}
+
+.app-footer__author {
+  color: var(--text-secondary);
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -199,6 +230,11 @@ body {
   
   .header__main {
     text-align: center;
+  }
+
+  .app-footer {
+    flex-direction: column;
+    gap: 0.45rem;
   }
 }
 
@@ -1156,6 +1192,12 @@ body {
   background: rgba(255, 255, 255, 0.1);
   border-color: var(--accent-primary);
   color: var(--accent-primary);
+}
+
+.main-panel-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1.25rem;
 }
 
 .header__actions {

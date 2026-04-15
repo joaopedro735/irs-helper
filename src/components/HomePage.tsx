@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, AlertTriangle, Download, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { AlertCircle, AlertTriangle, Download, Info, Loader2 } from 'lucide-react';
 import { DiffViewer } from './DiffViewer';
 import { EnrichmentReport } from './EnrichmentReport';
 import { FileUploader } from './FileUploader';
@@ -141,6 +142,13 @@ export function HomePage() {
   return (
     <>
       <main className="glass-panel">
+        <div className="main-panel-actions">
+          <Link to="/how-it-works" className="nav-button">
+            <Info size={18} />
+            {t('app.how_it_works')}
+          </Link>
+        </div>
+
         <div className="uploaders-container">
           <section className="upload-category">
             <div className="category-header">
