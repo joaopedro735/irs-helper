@@ -893,27 +893,35 @@ body {
 
 .enrichment-report__annex-group {
   margin-top: 2rem;
+  padding-top: 0.25rem;
 }
 
 .enrichment-report__annex-title {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-secondary);
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--text-primary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--panel-border);
+  letter-spacing: 0.08em;
+  margin-bottom: 1.1rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid color-mix(in oklab, var(--accent-primary) 40%, var(--panel-border));
+  border-left-width: 4px;
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--accent-primary) 14%, transparent);
+  box-shadow: 0 6px 18px color-mix(in oklab, var(--accent-primary) 18%, transparent);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .enrichment-report__annex-title span {
-  background: var(--panel-border);
-  padding: 0.1rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
+  background: color-mix(in oklab, var(--accent-primary) 22%, transparent);
+  color: var(--text-primary);
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 .enrichment-card--blue .enrichment-card__badge { background: rgba(59,130,246,0.15); color: #60a5fa; }
