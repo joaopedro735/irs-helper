@@ -5,10 +5,10 @@ import './index.css'
 import './i18n'
 import App from './App.tsx'
 
-// Initialize service worker and offline support
-if ('serviceWorker' in navigator) {
+// Register service worker only in production; Vite dev serves HTML fallback for unknown paths.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/assets/serviceWorker.js', {
+    navigator.serviceWorker.register('/service-worker.js', {
       scope: '/',
     }).then(() => {
       console.log('Service Worker registered successfully');

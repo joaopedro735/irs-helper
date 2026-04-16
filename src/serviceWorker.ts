@@ -2,12 +2,13 @@
 
 declare const self: ServiceWorkerGlobalScope;
 
-const CACHE_NAME = 'irs-helper-v2';
+const CACHE_NAME = 'irs-helper-v4';
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
   '/favicon.svg',
-  '/assets/pdf.worker.mjs',
+  '/service-worker.js',
+  '/assets/pdf.worker.js',
 ];
 
 // Files matching these patterns will be cached
