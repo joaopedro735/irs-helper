@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { AlertCircle, AlertTriangle, Download, Info, Loader2 } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Download, Info, Loader2, X } from 'lucide-react';
 import { DiffViewer } from './DiffViewer';
 import { EnrichmentReport } from './EnrichmentReport';
 import { FileUploader } from './FileUploader';
@@ -28,7 +28,7 @@ interface BrokerSection {
  * Home page for the IRS enrichment workflow: upload files, process data, and review outputs.
  */
 export function HomePage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [xmlFile, setXmlFile] = useState<File | null>(null);
   const [xtbCapitalGainsPdf, setXtbCapitalGainsPdf] = useState<File | null>(null);
   const [xtbDividendsPdf, setXtbDividendsPdf] = useState<File | null>(null);
@@ -37,12 +37,17 @@ export function HomePage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<EnrichmentResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showDonationPrompt, setShowDonationPrompt] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
-  const bmcBtnRef = useRef<HTMLElement | null>(null);
 
-  const initializeBmcWidget = () => {
-    window.dispatchEvent(new Event('DOMContentLoaded'));
-  };
+  const donationWidgetUrl = useMemo(() => {
+    const params = new URLSearchParams({
+      description: t('app.bmc.popup.widget_description'),
+      color: '#5F7FFF',
+    });
+
+    return `https://www.buymeacoffee.com/widget/page/diogo.almeida?${params.toString()}`;
+  }, [t]);
 
   useEffect(() => {
     if (result && resultsRef.current) {
@@ -51,72 +56,26 @@ export function HomePage() {
   }, [result]);
 
   useEffect(() => {
-    // Watch for the BMC widget button being injected into the DOM
-    const observer = new MutationObserver(() => {
-      const btn = document.getElementById('bmc-wbtn');
-      if (btn) {
-        bmcBtnRef.current = btn as HTMLElement;
-        observer.disconnect();
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    const existingButton = document.getElementById('bmc-wbtn');
-    if (existingButton) {
-      bmcBtnRef.current = existingButton as HTMLElement;
-    }
-
-    const existingScript = document.querySelector('script[data-name="BMC-Widget"]') as HTMLScriptElement | null;
-    if (existingScript) {
-      if (!existingButton) {
-        initializeBmcWidget();
-      }
-      return () => observer.disconnect();
-    }
-
-    if (!existingScript) {
-      const script = document.createElement('script');
-      script.setAttribute('data-name', 'BMC-Widget');
-      script.setAttribute('data-cfasync', 'false');
-      script.src = 'https://cdnjs.buymeacoffee.com/1.0.0/widget.prod.min.js';
-      script.setAttribute('data-id', 'diogo.almeida');
-      script.setAttribute('data-description', t('app.bmc.description'));
-      script.setAttribute('data-message', t('app.bmc.message'));
-      script.setAttribute('data-color', '#5F7FFF');
-      script.setAttribute('data-position', 'Right');
-      script.setAttribute('data-x_margin', '18');
-      script.setAttribute('data-y_margin', '18');
-      script.onload = () => {
-        initializeBmcWidget();
-      };
-      document.body.appendChild(script);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const existingScript = document.querySelector('script[data-name="BMC-Widget"]') as HTMLScriptElement | null;
-    if (!existingScript) {
+    if (!showDonationPrompt) {
       return;
     }
 
-    existingScript.setAttribute('data-description', t('app.bmc.description'));
-    existingScript.setAttribute('data-message', t('app.bmc.message'));
-  }, [i18n.language, t]);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
 
-  const handleBmcClick = () => {
-    const btn = bmcBtnRef.current ?? document.getElementById('bmc-wbtn');
-    if (btn) {
-      btn.click();
-    } else {
-      initializeBmcWidget();
-      window.setTimeout(() => {
-        const retriedButton = bmcBtnRef.current ?? document.getElementById('bmc-wbtn');
-        retriedButton?.click();
-      }, 150);
-    }
-  };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowDonationPrompt(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [showDonationPrompt]);
 
   const hasBrokerFile = xtbCapitalGainsPdf || xtbDividendsPdf || tradeRepublicPdf || trading212Pdf;
 
@@ -221,6 +180,7 @@ export function HomePage() {
     const originalName = xmlFile?.name.replace('.xml', '') || 'irs-declaration';
     const enrichedName = `${originalName}-enriched.xml`;
     downloadXmlFile(result.enrichedXml, enrichedName);
+    setShowDonationPrompt(true);
   };
 
   const handleReset = () => {
@@ -236,14 +196,19 @@ export function HomePage() {
             <Info size={18} />
             {t('app.how_it_works')}
           </Link>
-          <button onClick={handleBmcClick} className="nav-button bmc-button">
+          <a
+            href="https://www.buymeacoffee.com/diogo.almeida"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="nav-button bmc-button"
+          >
             <img
               src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg"
               alt={t('app.bmc.alt')}
               style={{ height: '16px', width: '16px' }}
             />
             {t('app.bmc.button')}
-          </button>
+          </a>
         </div>
 
         <div className="uploaders-container">
@@ -351,7 +316,7 @@ export function HomePage() {
 
           {result && (
             <div className="status-msg status-warning">
-              <AlertTriangle size={20} />
+              <AlertTriangle size={30} style={{ color: 'var(--warning-color)', flexShrink: 0 }} />
               {t('app.result.disclaimer')}
             </div>
           )}
@@ -362,6 +327,61 @@ export function HomePage() {
         <div className="results-section" ref={resultsRef}>
           <EnrichmentReport summary={result.summary} />
           <DiffViewer originalXml={result.originalXml} enrichedXml={result.enrichedXml} />
+        </div>
+      )}
+
+      {showDonationPrompt && (
+        <div
+          className="donation-modal-backdrop"
+          onClick={() => setShowDonationPrompt(false)}
+          role="presentation"
+        >
+          <div
+            className="donation-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="donation-modal-title"
+            onClick={event => event.stopPropagation()}
+          >
+            <button
+              className="donation-modal__close"
+              onClick={() => setShowDonationPrompt(false)}
+              aria-label={t('app.bmc.popup.close')}
+            >
+              <X size={18} />
+            </button>
+
+            <div className="donation-modal__header">
+              <h2 id="donation-modal-title" className="donation-modal__title">
+                {t('app.bmc.popup.title')}
+              </h2>
+              <p className="donation-modal__subtitle">{t('app.bmc.popup.subtitle')}</p>
+            </div>
+
+            <div className="donation-modal__iframe-shell">
+              <iframe
+                className="donation-modal__iframe"
+                src={donationWidgetUrl}
+                title={t('app.bmc.popup.iframe_title')}
+                loading="lazy"
+                allow="payment *; publickey-credentials-get *"
+              />
+            </div>
+
+            <div className="donation-modal__actions">
+              <button className="btn btn-secondary donation-modal__action" onClick={() => setShowDonationPrompt(false)}>
+                {t('app.bmc.popup.close')}
+              </button>
+              <a
+                href="https://www.buymeacoffee.com/diogo.almeida"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary donation-modal__action"
+              >
+                {t('app.bmc.popup.open_link')}
+              </a>
+            </div>
+          </div>
         </div>
       )}
     </>

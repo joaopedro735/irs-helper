@@ -1,13 +1,19 @@
 {
   "app": {
     "title": "IRS Helper",
-    "subtitle": "Preencha facilmente os Anexos J e G do IRS com relatórios anuais das corretoras",
+    "subtitle": "Preencha facilmente os Anexos G e J do seu IRS com relatórios anuais das corretoras",
     "how_it_works": "Como funciona",
     "bmc": {
       "button": "Paga-me um café",
       "alt": "Paga-me um café",
-      "description": "Apoia-me no Buy Me a Coffee!",
-      "message": "Ajudei-te? Paga-me um café"
+      "popup": {
+        "title": "Consegui poupar-lhe tempo?",
+        "subtitle": "O seu ficheiro está pronto. Se isto lhe poupou tempo, considere apoiar o projeto com um café. Obrigado!",
+        "close": "Talvez depois",
+        "open_link": "Abrir Buy Me a Coffee",
+        "iframe_title": "Donativo no Buy Me a Coffee",
+        "widget_description": "Apoia o IRS Helper no Buy Me a Coffee"
+      }
     },
     "navigation": {
       "back": "Voltar"
@@ -21,7 +27,7 @@
       "start_over": "Começar de novo",
       "title": "Resultados do Processamento",
       "subtitle": "Foram adicionadas {{count}} linhas no total em {{activeTables}} tabela(s).",
-      "disclaimer": "Verifique sempre manualmente se os valores gerados são corretos e estão nos campos certos do formulário IRS. Este é um projeto de código aberto com o objetivo de facilitar o preenchimento do IRS — não substitui aconselhamento contabilístico profissional."
+      "disclaimer": "Verifique sempre manualmente se os valores gerados são corretos e estão nos campos certos do formulário IRS.\nEste é um projeto de código aberto com o objetivo de facilitar o preenchimento do IRS — não substitui aconselhamento contabilístico profissional."
     },
     "error": {
       "no_rows": "Não foram encontradas linhas relevantes no(s) PDF(s) fornecido(s).",

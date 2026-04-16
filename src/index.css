@@ -570,6 +570,13 @@ body {
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
+.status-warning {
+  background-color: rgba(245, 158, 11, 0.12);
+  color: var(--warning-color);
+  border: 1px solid rgba(245, 158, 11, 0.24);
+  white-space: pre-line;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -790,6 +797,12 @@ body {
   background: #000000;
   color: #ffffff;
   border: 1px solid #ffffff;
+}
+
+.enrichment-card__source-tag--t212 {
+  background: #0099fd;
+  color: #ffffff;
+  border-color: #007dd4;
 }
 
 .enrichment-report__annex-group {
@@ -1239,11 +1252,111 @@ body {
   color: #fff !important;
 }
 
-/* Hide the default BMC floating button visually but keep it in the DOM so
-   programmatic .click() still opens the on-page popup */
-#bmc-wbtn {
-  opacity: 0 !important;
-  pointer-events: none !important;
+.donation-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.donation-modal {
+  width: min(100%, 520px);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
+  padding: 1.25rem;
+  position: relative;
+  animation: fadeIn 0.22s ease;
+}
+
+.donation-modal__close {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  background: transparent;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.donation-modal__close:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.donation-modal__header {
+  padding-right: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.donation-modal__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.35rem;
+}
+
+.donation-modal__subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.donation-modal__iframe-shell {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.donation-modal__iframe {
+  display: block;
+  width: 100%;
+  height: 540px;
+  border: 0;
+  background: #ffffff;
+}
+
+.donation-modal__actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.donation-modal__action {
+  flex: 1;
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  .donation-modal {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .donation-modal__iframe {
+    height: 70vh;
+    min-height: 440px;
+  }
+
+  .donation-modal__actions {
+    flex-direction: column;
+  }
 }
 
 .header__actions {

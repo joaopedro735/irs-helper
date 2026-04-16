@@ -1,13 +1,19 @@
 {
   "app": {
     "title": "IRS Helper",
-    "subtitle": "Easily fill IRS Annexes J and G with broker annual reports.",
+    "subtitle": "Easily fill your IRS Annexes G and J with broker annual reports.",
     "how_it_works": "How it works",
     "bmc": {
       "button": "Buy me a coffee",
       "alt": "Buy me a coffee",
-      "description": "Support me on Buy Me a Coffee!",
-      "message": "Did this help? Buy me a coffee"
+      "popup": {
+        "title": "Did I save you time?",
+        "subtitle": "Your file is ready. If this saved you time, consider supporting the project with a coffee. Thank you!",
+        "close": "Maybe later",
+        "open_link": "Open Buy Me a Coffee",
+        "iframe_title": "Buy Me a Coffee donation",
+        "widget_description": "Support IRS Helper on Buy Me a Coffee"
+      }
     },
     "navigation": {
       "back": "Back to Home"
@@ -21,7 +27,7 @@
       "start_over": "Start Over",
       "title": "Processing Results",
       "subtitle": "{{count}} total rows were added across {{activeTables}} table(s).",
-      "disclaimer": "Always manually verify that the generated values are correct and placed in the right fields of the IRS form. This is an open-source project aimed at making the IRS filing process easier — it is not a substitute for professional accounting advice."
+      "disclaimer": "Always manually verify that the generated values are correct and placed in the right fields of the IRS form.\nThis is an open-source project aimed at making the IRS filing process easier — it is not a substitute for professional accounting advice."
     },
     "error": {
       "no_rows": "No relevant rows found in the provided PDF(s).",
