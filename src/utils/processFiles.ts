@@ -17,6 +17,23 @@ export interface ProcessTaxFilesInput {
   trading212Pdf?: File | null;
 }
 
+export interface ProcessBrokerFilesInput {
+  xtbCapitalGainsPdf?: File | null;
+  xtbDividendsPdf?: File | null;
+  tradeRepublicPdf?: File | null;
+  trading212Pdf?: File | null;
+}
+
+export interface BrokerFilesResult {
+  parsedData: ParsedPdfData;
+  sources: {
+    table8A: string[];
+    table92A: string[];
+    table92B: string[];
+    tableG13: string[];
+  };
+}
+
 interface ParseJob {
   file: File | null | undefined;
   parser: (file: File) => Promise<ParsedPdfData>;
@@ -119,6 +136,68 @@ export async function processTaxFiles(input: ProcessTaxFilesInput): Promise<Enri
     table92B: [...sources.table92B],
     tableG13: [...sources.tableG13],
   });
+}
+
+/**
+ * Parses all uploaded broker files and returns the raw parsed data without XML enrichment.
+ * Throws `NO_ROWS_FOUND_ERROR` when no supported rows are extracted.
+ */
+export async function processBrokerFiles(input: ProcessBrokerFilesInput): Promise<BrokerFilesResult> {
+  const parsedData = emptyParsedData();
+
+  const sources: AggregatedSources = {
+    table8A: new Set<BrokerName>(),
+    table92A: new Set<BrokerName>(),
+    table92B: new Set<BrokerName>(),
+    tableG13: new Set<BrokerName>(),
+  };
+
+  const parseJobs: ParseJob[] = [
+    {
+      file: input.xtbCapitalGainsPdf,
+      parser: parseXtbCapitalGainsPdf,
+      brokerName: 'XTB',
+    },
+    {
+      file: input.xtbDividendsPdf,
+      parser: parseXtbDividendsPdf,
+      brokerName: 'XTB',
+    },
+    {
+      file: input.tradeRepublicPdf,
+      parser: parseTradeRepublicPdf,
+      brokerName: 'Trade Republic',
+    },
+    {
+      file: input.trading212Pdf,
+      parser: parseTrading212Pdf,
+      brokerName: 'Trading 212',
+    },
+  ];
+
+  for (const parseJob of parseJobs) {
+    if (!parseJob.file) {
+      continue;
+    }
+
+    const parsed = await parseJob.parser(parseJob.file);
+    mergeParsedData(parsedData, parsed, parseJob.brokerName, sources);
+  }
+
+  const totalRows = parsedData.rows8A.length + parsedData.rows92A.length + parsedData.rows92B.length + parsedData.rowsG13.length;
+  if (totalRows === 0) {
+    throw new Error(NO_ROWS_FOUND_ERROR);
+  }
+
+  return {
+    parsedData,
+    sources: {
+      table8A: [...sources.table8A],
+      table92A: [...sources.table92A],
+      table92B: [...sources.table92B],
+      tableG13: [...sources.tableG13],
+    },
+  };
 }
 
 /**

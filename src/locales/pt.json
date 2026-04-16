@@ -19,7 +19,7 @@
       "back": "Voltar"
     },
     "process": {
-      "button": "Gerar Ficheiro de Importação IRS",
+      "button": "Processar Relatórios",
       "processing": "Processando..."
     },
     "result": {
@@ -53,6 +53,10 @@
     "xml_lane": "Declaração de IRS Base",
     "xml_file": "Selecione o seu ficheiro .xml",
     "xml_description": "Carregue o ficheiro XML exportado do Portal das Finanças.",
+    "step1_lane": "Escolher Modo",
+    "step1_description": "Carregue um ficheiro XML para o enriquecer, ou visualize as tabelas IRS a partir dos relatórios das corretoras.",
+    "mode_enrich": "Carregar Ficheiro XML",
+    "mode_tables": "Ver Tabelas IRS",
     "brokers_lane": "Relatórios das Corretoras",
     "brokers_description": "Carregue os relatórios PDF das suas corretoras para extrair dados financeiros.",
     "xtb_lane": "XTB",
@@ -108,6 +112,11 @@
       "expenses_charges": "Despesas e Encargos",
       "net_income": "Rendimento Líquido"
     }
+  },
+  "tables": {
+    "title": "Tabelas IRS",
+    "subtitle": "{{count}} linhas no total em {{activeTables}} tabela(s).",
+    "control_sum": "Soma de Controlo"
   },
   "diff": {
     "title": "Comparação Antes / Depois",

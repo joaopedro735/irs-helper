@@ -1,13 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { AlertCircle, AlertTriangle, Coins, Download, Info, Loader2, X } from 'lucide-react';
+import { AlertCircle, AlertTriangle, Coins, Download, Eye, Info, Loader2, Upload, X } from 'lucide-react';
 import { DiffViewer } from './DiffViewer';
 import { EnrichmentReport } from './EnrichmentReport';
 import { FileUploader } from './FileUploader';
-import { NO_ROWS_FOUND_ERROR, downloadXmlFile, processTaxFiles } from '../utils/processFiles';
+import { IrsTablesViewer } from './IrsTablesViewer';
+import { NO_ROWS_FOUND_ERROR, downloadXmlFile, processBrokerFiles, processTaxFiles } from '../utils/processFiles';
+import type { BrokerFilesResult } from '../utils/processFiles';
 import { PdfParsingError } from '../utils/pdfParser';
 import type { EnrichmentResult } from '../types';
+
+type WorkflowMode = 'enrich' | 'tables';
 
 interface BrokerUploader {
   labelKey: string;
@@ -29,6 +33,7 @@ interface BrokerSection {
  */
 export function HomePage() {
   const { t } = useTranslation();
+  const [workflowMode, setWorkflowMode] = useState<WorkflowMode>('enrich');
   const [xmlFile, setXmlFile] = useState<File | null>(null);
   const [xtbCapitalGainsPdf, setXtbCapitalGainsPdf] = useState<File | null>(null);
   const [xtbDividendsPdf, setXtbDividendsPdf] = useState<File | null>(null);
@@ -36,9 +41,12 @@ export function HomePage() {
   const [trading212Pdf, setTrading212Pdf] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<EnrichmentResult | null>(null);
+  const [tablesResult, setTablesResult] = useState<BrokerFilesResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showDonationPrompt, setShowDonationPrompt] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const tablesRef = useRef<HTMLDivElement>(null);
+  const donationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const donationWidgetUrl = useMemo(() => {
     const params = new URLSearchParams({
@@ -54,6 +62,44 @@ export function HomePage() {
       resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [result]);
+
+  useEffect(() => {
+    if (tablesResult && tablesRef.current) {
+      tablesRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [tablesResult]);
+
+  // Scroll-based donation trigger for tables-only mode
+  const handleTablesVisible = useCallback(() => {
+    if (donationTimerRef.current) return;
+    donationTimerRef.current = setTimeout(() => {
+      setShowDonationPrompt(true);
+    }, 10_000);
+  }, []);
+
+  useEffect(() => {
+    if (!tablesResult || !tablesRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          handleTablesVisible();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    observer.observe(tablesRef.current);
+
+    return () => {
+      observer.disconnect();
+      if (donationTimerRef.current) {
+        clearTimeout(donationTimerRef.current);
+        donationTimerRef.current = null;
+      }
+    };
+  }, [tablesResult, handleTablesVisible]);
 
   useEffect(() => {
     if (!showDonationPrompt) {
@@ -137,25 +183,37 @@ export function HomePage() {
     [xtbCapitalGainsPdf, xtbDividendsPdf, tradeRepublicPdf, trading212Pdf],
   );
 
+  const canProcess = workflowMode === 'enrich'
+    ? !!xmlFile && !!hasBrokerFile
+    : !!hasBrokerFile;
+
   const handleProcess = async () => {
-    if (!xmlFile || !hasBrokerFile) {
-      return;
-    }
+    if (!canProcess) return;
 
     setIsProcessing(true);
     setError(null);
     setResult(null);
+    setTablesResult(null);
 
     try {
-      const enrichmentResult = await processTaxFiles({
-        xmlFile,
-        xtbCapitalGainsPdf,
-        xtbDividendsPdf,
-        tradeRepublicPdf,
-        trading212Pdf,
-      });
-
-      setResult(enrichmentResult);
+      if (workflowMode === 'enrich') {
+        const enrichmentResult = await processTaxFiles({
+          xmlFile: xmlFile!,
+          xtbCapitalGainsPdf,
+          xtbDividendsPdf,
+          tradeRepublicPdf,
+          trading212Pdf,
+        });
+        setResult(enrichmentResult);
+      } else {
+        const brokerResult = await processBrokerFiles({
+          xtbCapitalGainsPdf,
+          xtbDividendsPdf,
+          tradeRepublicPdf,
+          trading212Pdf,
+        });
+        setTablesResult(brokerResult);
+      }
     } catch (err: unknown) {
       console.error(err);
 
@@ -185,8 +243,15 @@ export function HomePage() {
 
   const handleReset = () => {
     setResult(null);
+    setTablesResult(null);
     setError(null);
+    if (donationTimerRef.current) {
+      clearTimeout(donationTimerRef.current);
+      donationTimerRef.current = null;
+    }
   };
+
+  const hasResult = result || tablesResult;
 
   return (
     <>
@@ -212,17 +277,37 @@ export function HomePage() {
             <div className="category-header">
               <span className="category-number">1</span>
               <div className="category-text">
-                <h2 className="category-title">{t('uploader.xml_lane')}</h2>
-                <p className="category-description">{t('uploader.xml_description')}</p>
+                <h2 className="category-title">{t('uploader.step1_lane')}</h2>
+                <p className="category-description">{t('uploader.step1_description')}</p>
               </div>
             </div>
             <div className="category-content">
-              <FileUploader
-                label={t('uploader.xml_file')}
-                accept=".xml"
-                onFileSelect={setXmlFile}
-                onRemove={() => setXmlFile(null)}
-              />
+              <div className="workflow-toggle">
+                <button
+                  className={`workflow-toggle__option ${workflowMode === 'enrich' ? 'workflow-toggle__option--active' : ''}`}
+                  onClick={() => setWorkflowMode('enrich')}
+                  type="button"
+                >
+                  <Upload size={16} />
+                  {t('uploader.mode_enrich')}
+                </button>
+                <button
+                  className={`workflow-toggle__option ${workflowMode === 'tables' ? 'workflow-toggle__option--active' : ''}`}
+                  onClick={() => setWorkflowMode('tables')}
+                  type="button"
+                >
+                  <Eye size={16} />
+                  {t('uploader.mode_tables')}
+                </button>
+              </div>
+              {workflowMode === 'enrich' && (
+                <FileUploader
+                  label={t('uploader.xml_file')}
+                  accept=".xml"
+                  onFileSelect={setXmlFile}
+                  onRemove={() => setXmlFile(null)}
+                />
+              )}
             </div>
           </section>
 
@@ -276,11 +361,11 @@ export function HomePage() {
         </div>
 
         <div className="action-area">
-          {!result ? (
+          {!hasResult ? (
             <button
               className="btn btn-primary"
               onClick={handleProcess}
-              disabled={!xmlFile || !hasBrokerFile || isProcessing}
+              disabled={!canProcess || isProcessing}
             >
               {isProcessing ? (
                 <>
@@ -293,10 +378,12 @@ export function HomePage() {
             </button>
           ) : (
             <div className="action-buttons">
-              <button className="btn btn-primary" onClick={handleDownload}>
-                <Download size={20} />
-                {t('app.result.download')}
-              </button>
+              {result && (
+                <button className="btn btn-primary" onClick={handleDownload}>
+                  <Download size={20} />
+                  {t('app.result.download')}
+                </button>
+              )}
               <button className="btn btn-secondary" onClick={handleReset}>
                 {t('app.result.start_over')}
               </button>
@@ -310,7 +397,7 @@ export function HomePage() {
             </div>
           )}
 
-          {result && (
+          {hasResult && (
             <div className="status-msg status-warning">
               <AlertTriangle size={30} style={{ color: 'var(--warning-color)', flexShrink: 0 }} />
               {t('app.result.disclaimer')}
@@ -323,6 +410,12 @@ export function HomePage() {
         <div className="results-section" ref={resultsRef}>
           <EnrichmentReport summary={result.summary} />
           <DiffViewer originalXml={result.originalXml} enrichedXml={result.enrichedXml} />
+        </div>
+      )}
+
+      {tablesResult && (
+        <div className="results-section" ref={tablesRef}>
+          <IrsTablesViewer parsedData={tablesResult.parsedData} sources={tablesResult.sources} />
         </div>
       )}
 

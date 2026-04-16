@@ -19,7 +19,7 @@
       "back": "Back to Home"
     },
     "process": {
-      "button": "Generate IRS Import File",
+      "button": "Process Reports",
       "processing": "Processing..."
     },
     "result": {
@@ -53,6 +53,10 @@
     "xml_lane": "Base IRS Declaration",
     "xml_file": "Select your .xml file",
     "xml_description": "Upload the XML file exported from the Tax Authority portal.",
+    "step1_lane": "Choose Workflow",
+    "step1_description": "Upload an XML file to enrich it, or just view the IRS tables from your broker reports.",
+    "mode_enrich": "Upload XML File",
+    "mode_tables": "Show IRS Tables",
     "brokers_lane": "Broker Reports",
     "brokers_description": "Upload PDF reports from your brokers to extract financial data.",
     "xtb_lane": "XTB",
@@ -108,6 +112,11 @@
       "expenses_charges": "Expenses & Charges",
       "net_income": "Net Income"
     }
+  },
+  "tables": {
+    "title": "IRS Tables",
+    "subtitle": "{{count}} total rows across {{activeTables}} table(s).",
+    "control_sum": "Control Sum"
   },
   "diff": {
     "title": "Before / After Comparison",

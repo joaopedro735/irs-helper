@@ -376,6 +376,60 @@ body {
 }
 
 /* =========================================================
+   Workflow Mode Toggle
+   ========================================================= */
+
+.workflow-toggle {
+  display: flex;
+  gap: 0.5rem;
+  padding: 4px;
+  background: var(--broker-group-bg);
+  border: 1px solid var(--broker-group-border);
+  border-radius: 10px;
+}
+
+.workflow-toggle__option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.workflow-toggle__option:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="light"] .workflow-toggle__option:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.workflow-toggle__option--active {
+  background: var(--accent-primary);
+  color: white;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+
+.workflow-toggle__option--active:hover {
+  background: var(--accent-hover);
+  color: white;
+}
+
+[data-theme="light"] .workflow-toggle__option--active:hover {
+  background: var(--accent-hover);
+}
+
+/* =========================================================
    Broker Groups
    ========================================================= */
 
@@ -898,6 +952,90 @@ body {
   font-size: 0.78rem;
   color: var(--text-secondary);
   font-style: italic;
+}
+
+/* =========================================================
+   IRS Tables Viewer
+   ========================================================= */
+
+.irs-table-card {
+  border-radius: 10px;
+  padding: 1.25rem;
+  border: 1px solid var(--broker-group-border);
+  background: var(--broker-group-bg);
+  margin-bottom: 1rem;
+}
+
+.irs-table-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.irs-table-card__table-wrapper {
+  overflow-x: auto;
+  margin-top: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--broker-group-border);
+}
+
+.irs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.irs-table th {
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--broker-group-border);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+[data-theme="light"] .irs-table th {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.irs-table td {
+  padding: 0.45rem 0.75rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  border-bottom: 1px solid var(--broker-group-border);
+}
+
+.irs-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.irs-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="light"] .irs-table tbody tr:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.irs-table-card__totals {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--broker-group-border);
+}
+
+.irs-table-card__totals-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.35rem;
 }
 
 /* =========================================================
