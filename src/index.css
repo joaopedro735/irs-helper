@@ -1456,3 +1456,31 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
+@media (max-width: 768px) {
+  .broker-header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .tooltip-container {
+    width: 100%;
+    order: 3;
+    margin-top: 0.45rem;
+  }
+
+  .tooltip-trigger {
+    display: none;
+  }
+
+  .tooltip-content {
+    position: static;
+    width: 100%;
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    padding: 0.85rem 0.95rem;
+    box-shadow: none;
+  }
+}
+
