@@ -26,7 +26,16 @@ function App() {
     <div className="app-container">
       <header className="header">
         <div className="header__main">
-          <h1 className="title">{t('app.title')}</h1>
+          <div className="header__brand">
+            <img
+              src="/app-icon.svg"
+              alt="IRS Helper icon"
+              className="header__logo"
+              width={44}
+              height={44}
+            />
+            <h1 className="title">{t('app.title')}</h1>
+          </div>
           <p className="subtitle">{t('app.subtitle')}</p>
         </div>
         <div className="header__actions">

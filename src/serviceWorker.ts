@@ -6,7 +6,7 @@ const CACHE_NAME = 'irs-helper-v4';
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
-  '/favicon.svg',
+  '/app-icon.svg',
   '/service-worker.js',
   '/assets/pdf.worker.js',
 ];
