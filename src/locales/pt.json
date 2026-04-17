@@ -127,5 +127,9 @@
   "languages": {
     "en": "Inglês",
     "pt": "Português (Portugal)"
+  },
+  "contact": {
+    "button": "Contactar",
+    "tooltip": "Sugerir funcionalidades ou ajudar a apoiar o projeto"
   }
 }

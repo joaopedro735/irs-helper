@@ -119,6 +119,15 @@ body {
   flex-wrap: wrap;
   color: var(--text-secondary);
   font-size: 0.9rem;
+  flex-direction: column;
+}
+
+.app-footer__links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .app-footer__link {
