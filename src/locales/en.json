@@ -5,14 +5,11 @@
     "how_it_works": "How it works",
     "bmc": {
       "button": "Support the project",
-      "alt": "Support the project",
       "popup": {
         "title": "Did I save you time? 💸",
         "subtitle": "Your file is ready. If this saved you time, consider supporting the project from $1. Thank you!",
         "close": "Maybe later",
-        "open_link": "Open support page",
-        "iframe_title": "Project support",
-        "widget_description": "Support IRS Helper"
+        "open_link": "Open support page"
       }
     },
     "navigation": {

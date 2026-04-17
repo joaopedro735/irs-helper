@@ -48,15 +48,6 @@ export function HomePage() {
   const tablesRef = useRef<HTMLDivElement>(null);
   const donationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const donationWidgetUrl = useMemo(() => {
-    const params = new URLSearchParams({
-      description: t('app.bmc.popup.widget_description'),
-      color: '#5F7FFF',
-    });
-
-    return `https://www.buymeacoffee.com/widget/page/diogo.almeida?${params.toString()}`;
-  }, [t]);
-
   useEffect(() => {
     if (result && resultsRef.current) {
       resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -262,7 +253,7 @@ export function HomePage() {
             {t('app.how_it_works')}
           </Link>
           <a
-            href="https://www.buymeacoffee.com/diogo.almeida"
+            href="https://donate.stripe.com/00w5kEaSE3D40KEaZw8IU00"
             target="_blank"
             rel="noopener noreferrer"
             className="nav-button bmc-button"
@@ -452,7 +443,7 @@ export function HomePage() {
                 {t('app.bmc.popup.close')}
               </button>
               <a
-                href="https://www.buymeacoffee.com/diogo.almeida"
+                href="https://donate.stripe.com/00w5kEaSE3D40KEaZw8IU00"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-primary donation-modal__action"

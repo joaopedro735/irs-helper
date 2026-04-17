@@ -5,14 +5,11 @@
     "how_it_works": "Como funciona",
     "bmc": {
       "button": "Apoiar o projeto",
-      "alt": "Apoiar o projeto",
       "popup": {
         "title": "Consegui poupar-lhe tempo? 💸",
         "subtitle": "O seu ficheiro está pronto. Se isto lhe poupou tempo, considere apoiar o projeto a partir de 1€. Obrigado!",
         "close": "Talvez depois",
-        "open_link": "Abrir página de apoio",
-        "iframe_title": "Apoio ao projeto",
-        "widget_description": "Apoie o IRS Helper"
+        "open_link": "Abrir página de apoio"
       }
     },
     "navigation": {
