@@ -4,22 +4,19 @@
     "subtitle": "Preencha facilmente os Anexos G e J do seu IRS com relatórios anuais das corretoras",
     "how_it_works": "Como funciona",
     "bmc": {
-      "button": "Pague-me um café",
-      "alt": "Pague-me um café",
+      "button": "Apoiar o projeto",
       "popup": {
-        "title": "Consegui poupar-lhe tempo?",
-        "subtitle": "O seu ficheiro está pronto. Se isto lhe poupou tempo, considere apoiar o projeto com um café. Obrigado!",
+        "title": "Consegui poupar-lhe tempo? 💸",
+        "subtitle": "O seu ficheiro está pronto. Se isto lhe poupou tempo, considere apoiar o projeto a partir de 1€. Obrigado!",
         "close": "Talvez depois",
-        "open_link": "Abrir Buy Me a Coffee",
-        "iframe_title": "Donativo no Buy Me a Coffee",
-        "widget_description": "Apoia o IRS Helper no Buy Me a Coffee"
+        "open_link": "Abrir página de apoio"
       }
     },
     "navigation": {
       "back": "Voltar"
     },
     "process": {
-      "button": "Gerar Ficheiro de Importação IRS",
+      "button": "Processar Relatórios",
       "processing": "Processando..."
     },
     "result": {
@@ -53,6 +50,10 @@
     "xml_lane": "Declaração de IRS Base",
     "xml_file": "Selecione o seu ficheiro .xml",
     "xml_description": "Carregue o ficheiro XML exportado do Portal das Finanças.",
+    "step1_lane": "Escolher Modo",
+    "step1_description": "Carregue um ficheiro XML para o enriquecer, ou visualize as tabelas IRS a partir dos relatórios das corretoras.",
+    "mode_enrich": "Carregar Ficheiro XML",
+    "mode_tables": "Ver Tabelas IRS",
     "brokers_lane": "Relatórios das Corretoras",
     "brokers_description": "Carregue os relatórios PDF das suas corretoras para extrair dados financeiros.",
     "xtb_lane": "XTB",
@@ -109,6 +110,11 @@
       "net_income": "Rendimento Líquido"
     }
   },
+  "tables": {
+    "title": "Tabelas IRS",
+    "subtitle": "{{count}} linhas no total em {{activeTables}} tabela(s).",
+    "control_sum": "Soma de Controlo"
+  },
   "diff": {
     "title": "Comparação Antes / Depois",
     "unified": "Unificado",
@@ -121,5 +127,9 @@
   "languages": {
     "en": "Inglês",
     "pt": "Português (Portugal)"
+  },
+  "contact": {
+    "button": "Contactar",
+    "tooltip": "Sugerir funcionalidades ou ajudar a apoiar o projeto"
   }
 }

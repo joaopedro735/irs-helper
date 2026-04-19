@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Routes, Route } from 'react-router-dom';
 import { HomePage } from './components/HomePage';
 import { HowItWorksPage } from './components/HowItWorksPage';
-import { Languages, Sun, Moon } from 'lucide-react';
+import { Languages, Sun, Moon, Mail } from 'lucide-react';
 import { FaGithub } from 'react-icons/fa';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -26,7 +26,16 @@ function App() {
     <div className="app-container">
       <header className="header">
         <div className="header__main">
-          <h1 className="title">{t('app.title')}</h1>
+          <div className="header__brand">
+            <img
+              src="/app-icon.svg"
+              alt="IRS Helper icon"
+              className="header__logo"
+              width={44}
+              height={44}
+            />
+            <h1 className="title">{t('app.title')}</h1>
+          </div>
           <p className="subtitle">{t('app.subtitle')}</p>
         </div>
         <div className="header__actions">
@@ -59,17 +68,28 @@ function App() {
       </Routes>
 
       <footer className="app-footer">
-        <a
-          href="https://github.com/almeiduh/irs-helper"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="app-footer__link"
-          aria-label="GitHub repository"
-        >
-          <FaGithub size={16} aria-hidden="true" />
-          <span>GitHub Repository</span>
-        </a>
-        <span className="app-footer__author">Diogo Almeida</span>
+        <div className="app-footer__links">
+          <a
+            href="https://github.com/almeiduh/irs-helper"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="app-footer__link"
+            aria-label="GitHub repository"
+          >
+            <FaGithub size={16} aria-hidden="true" />
+            <span>Github</span>
+          </a>
+          <a
+            href="mailto:irshelper.festival366@passinbox.com?subject=IRS%20Helper%20-%20Feedback"
+            className="app-footer__link"
+            aria-label={t('contact.tooltip')}
+            title={t('contact.tooltip')}
+          >
+            <Mail size={16} aria-hidden="true" />
+            <span>{t('contact.button')}</span>
+          </a>
+        </div>
+        <span className="app-footer__author">Developed by Diogo Almeida</span>
       </footer>
       <Analytics />
     </div>
