@@ -548,7 +548,7 @@ export async function parseActivoBankPdf(file: File): Promise<ParsedPdfData> {
       rowsG9.push({
         titular: 'A',
         nif: ACTIVOBANK_NIF,
-        codEncargos: 'G06',
+        codEncargos: 'G01',
         anoRealizacao: saleDate.year,
         mesRealizacao: saleDate.month,
         diaRealizacao: saleDate.day,
