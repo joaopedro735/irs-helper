@@ -68,9 +68,24 @@ describe('parseDegiroTransactionsCsv', () => {
     expect(data.rows92A[0].anoAquisicao).toBe('2024');
   });
 
-  it('ignores non-target-year sells instead of failing on their incomplete history', async () => {
+  it('fails target-year sells after a prior-year oversell exhausted partial FIFO inventory', async () => {
     const csv = `Data,Hora,Produto,ISIN,Bolsa de referência,Bolsa,Quantidade,Preços,,Valor local,,Valor EUR,Taxa de Câmbio,Taxa Autofx,Custos de transação e/ou taxas de terceiros,Total EUR,ID da Ordem,
-10-01-2022,10:00,ETF,IE00B3XXRP09,EAM,XAMS,-1,"30,0000",EUR,"30,00",EUR,"30,00",,"0,00","-1,00","29,00",,sell-old
+10-01-2022,10:00,ETF,IE00B3XXRP09,EAM,XAMS,1,"25,0000",EUR,"-25,00",EUR,"-25,00",,"0,00","-0,50","-25,50",,buy-old
+10-02-2022,10:00,ETF,IE00B3XXRP09,EAM,XAMS,-2,"30,0000",EUR,"60,00",EUR,"60,00",,"0,00","-1,00","59,00",,sell-old
+10-03-2023,10:00,ETF,IE00B3XXRP09,EAM,XAMS,-1,"55,0000",EUR,"55,00",EUR,"55,00",,"0,00","-1,00","54,00",,sell-new
+`;
+
+    const fakeFile = new File([csv], 'degiro.csv', { type: 'text/csv' });
+    await expect(parseDegiroTransactionsCsv(fakeFile, { targetRealizationYear: '2023' })).rejects.toThrow(BrokerParsingError);
+    await expect(parseDegiroTransactionsCsv(fakeFile, { targetRealizationYear: '2023' })).rejects.toMatchObject({
+      i18nKey: 'parser.error.degiro_incomplete_history',
+    });
+  });
+
+  it('keeps later target-year sells valid when earlier non-target-year sells were fully covered', async () => {
+    const csv = `Data,Hora,Produto,ISIN,Bolsa de referência,Bolsa,Quantidade,Preços,,Valor local,,Valor EUR,Taxa de Câmbio,Taxa Autofx,Custos de transação e/ou taxas de terceiros,Total EUR,ID da Ordem,
+10-01-2022,10:00,ETF,IE00B3XXRP09,EAM,XAMS,1,"30,0000",EUR,"-30,00",EUR,"-30,00",,"0,00","-0,50","-30,50",,buy-old
+10-02-2022,10:00,ETF,IE00B3XXRP09,EAM,XAMS,-1,"35,0000",EUR,"35,00",EUR,"35,00",,"0,00","-1,00","34,00",,sell-old
 10-02-2023,10:00,ETF,IE00B3XXRP09,EAM,XAMS,1,"40,0000",EUR,"-40,00",EUR,"-40,00",,"0,00","-0,50","-40,50",,buy-new
 10-03-2023,10:00,ETF,IE00B3XXRP09,EAM,XAMS,-1,"55,0000",EUR,"55,00",EUR,"55,00",,"0,00","-1,00","54,00",,sell-new
 `;
@@ -80,6 +95,7 @@ describe('parseDegiroTransactionsCsv', () => {
 
     expect(data.rows92A).toHaveLength(1);
     expect(data.rows92A[0].anoRealizacao).toBe('2023');
+    expect(data.rows92A[0].anoAquisicao).toBe('2023');
   });
 
   it('fails when a sell cannot be matched to prior buys', async () => {

@@ -58,6 +58,13 @@ interface ParseDegiroTransactionsCsvOptions {
   targetRealizationYear?: string;
 }
 
+interface ConsumedSellEvent {
+  matchedQuantity: number;
+  rows92A: TaxRow[];
+}
+
+const QUANTITY_EPSILON = 0.000001;
+
 function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
   let currentRow: string[] = [];
@@ -278,20 +285,16 @@ function getEventYear(event: TradeEvent): string {
   return event.date.split('-')[2];
 }
 
-function getAvailableQuantity(lots: OpenLot[]): number {
-  return lots.reduce((total, lot) => total + lot.remainingQuantity, 0);
-}
-
 function consumeSellEventLots(
   countryCode: string,
   event: TradeEvent,
   lots: OpenLot[],
-  rows92A: TaxRow[],
   emitRows: boolean,
-): void {
+): ConsumedSellEvent {
   let remainingSellQuantity = Math.abs(event.quantity);
+  const consumedRows: TaxRow[] = [];
 
-  while (remainingSellQuantity > 0.000001) {
+  while (remainingSellQuantity > QUANTITY_EPSILON) {
     const openLot = lots[0];
     if (!openLot) {
       break;
@@ -299,16 +302,21 @@ function consumeSellEventLots(
 
     const matchedQuantity = Math.min(remainingSellQuantity, openLot.remainingQuantity);
     if (emitRows) {
-      rows92A.push(buildTaxRow(countryCode, event, openLot.acquisitionDate, matchedQuantity, Math.abs(event.quantity), openLot));
+      consumedRows.push(buildTaxRow(countryCode, event, openLot.acquisitionDate, matchedQuantity, Math.abs(event.quantity), openLot));
     }
 
     openLot.remainingQuantity -= matchedQuantity;
     remainingSellQuantity -= matchedQuantity;
 
-    if (openLot.remainingQuantity <= 0.000001) {
+    if (openLot.remainingQuantity <= QUANTITY_EPSILON) {
       lots.shift();
     }
   }
+
+  return {
+    matchedQuantity: Math.abs(event.quantity) - remainingSellQuantity,
+    rows92A: consumedRows,
+  };
 }
 
 export async function parseDegiroTransactionsCsv(
@@ -332,6 +340,7 @@ export async function parseDegiroTransactionsCsv(
   const events = consolidateTradeEvents(file.name, tradeRows);
   const rows92A: TaxRow[] = [];
   const openLots = new Map<string, OpenLot[]>();
+  const hasIncompleteHistory = new Map<string, boolean>();
   const targetRealizationYear = options.targetRealizationYear;
 
   for (const event of events) {
@@ -357,10 +366,19 @@ export async function parseDegiroTransactionsCsv(
     }
 
     const shouldEmitRows = !targetRealizationYear || getEventYear(event) === targetRealizationYear;
-    const availableQuantity = getAvailableQuantity(lots);
     const sellQuantity = Math.abs(event.quantity);
+    if (shouldEmitRows && hasIncompleteHistory.get(event.isin)) {
+      throw new BrokerParsingError(
+        `The DEGIRO CSV "${file.name}" is missing buy history required to match a sell transaction.`,
+        'parser.error.degiro_incomplete_history',
+        { fileName: file.name }
+      );
+    }
 
-    if (availableQuantity + 0.000001 < sellQuantity) {
+    const consumedSellEvent = consumeSellEventLots(countryCode, event, lots, shouldEmitRows);
+    openLots.set(event.isin, lots);
+
+    if (consumedSellEvent.matchedQuantity + QUANTITY_EPSILON < sellQuantity) {
       if (shouldEmitRows) {
         throw new BrokerParsingError(
           `The DEGIRO CSV "${file.name}" is missing buy history required to match a sell transaction.`,
@@ -368,12 +386,11 @@ export async function parseDegiroTransactionsCsv(
           { fileName: file.name }
         );
       }
-      openLots.set(event.isin, lots);
+      hasIncompleteHistory.set(event.isin, true);
       continue;
     }
 
-    consumeSellEventLots(countryCode, event, lots, rows92A, shouldEmitRows);
-    openLots.set(event.isin, lots);
+    rows92A.push(...consumedSellEvent.rows92A);
   }
 
   if (rows92A.length === 0) {
