@@ -490,6 +490,11 @@ body {
   color: #ffffff;
 }
 
+.broker-badge--freedom24 {
+  background: #00b051;
+  color: #ffffff;
+}
+
 [data-theme="light"] .broker-badge--tr {
   border-color: #000000;
 }

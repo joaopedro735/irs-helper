@@ -40,6 +40,7 @@ export function HomePage() {
   const [tradeRepublicPdf, setTradeRepublicPdf] = useState<File | null>(null);
   const [trading212Pdf, setTrading212Pdf] = useState<File | null>(null);
   const [activoBankPdf, setActivoBankPdf] = useState<File | null>(null);
+  const [freedom24Pdf, setFreedom24Pdf] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<EnrichmentResult | null>(null);
   const [tablesResult, setTablesResult] = useState<BrokerFilesResult | null>(null);
@@ -115,7 +116,7 @@ export function HomePage() {
     };
   }, [showDonationPrompt]);
 
-  const hasBrokerFile = xtbCapitalGainsPdf || xtbDividendsPdf || tradeRepublicPdf || trading212Pdf || activoBankPdf;
+  const hasBrokerFile = xtbCapitalGainsPdf || xtbDividendsPdf || tradeRepublicPdf || trading212Pdf || activoBankPdf || freedom24Pdf;
 
   const brokerSections: BrokerSection[] = useMemo(
     () => [
@@ -185,8 +186,26 @@ export function HomePage() {
           },
         ],
       },
+      {
+        badge: 'F24',
+        badgeClass: 'broker-badge--freedom24',
+        laneKey: 'uploader.freedom24_lane',
+        warningTitleKey: 'uploader.freedom24_warning_title',
+        warningKeys: [
+          'uploader.freedom24_warning_1',
+          'uploader.freedom24_warning_2',
+          'uploader.freedom24_warning_3',
+        ],
+        uploaders: [
+          {
+            labelKey: 'uploader.freedom24_report',
+            file: freedom24Pdf,
+            setFile: setFreedom24Pdf,
+          },
+        ],
+      },
     ],
-    [xtbCapitalGainsPdf, xtbDividendsPdf, tradeRepublicPdf, trading212Pdf, activoBankPdf],
+    [xtbCapitalGainsPdf, xtbDividendsPdf, tradeRepublicPdf, trading212Pdf, activoBankPdf, freedom24Pdf],
   );
 
   const canProcess = workflowMode === 'enrich'
@@ -210,6 +229,7 @@ export function HomePage() {
           tradeRepublicPdf,
           trading212Pdf,
           activoBankPdf,
+          freedom24Pdf,
         });
         setResult(enrichmentResult);
       } else {
@@ -219,6 +239,7 @@ export function HomePage() {
           tradeRepublicPdf,
           trading212Pdf,
           activoBankPdf,
+          freedom24Pdf,
         });
         setTablesResult(brokerResult);
       }

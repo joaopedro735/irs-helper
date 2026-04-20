@@ -1,5 +1,6 @@
 import {
   parseActivoBankPdf,
+  parseFreedom24Pdf,
   parseTradeRepublicPdf,
   parseTrading212Pdf,
   parseXtbCapitalGainsPdf,
@@ -17,6 +18,7 @@ export interface ProcessTaxFilesInput {
   tradeRepublicPdf?: File | null;
   trading212Pdf?: File | null;
   activoBankPdf?: File | null;
+  freedom24Pdf?: File | null;
 }
 
 export interface ProcessBrokerFilesInput {
@@ -25,6 +27,7 @@ export interface ProcessBrokerFilesInput {
   tradeRepublicPdf?: File | null;
   trading212Pdf?: File | null;
   activoBankPdf?: File | null;
+  freedom24Pdf?: File | null;
 }
 
 export interface BrokerFilesResult {
@@ -131,6 +134,11 @@ export async function processTaxFiles(input: ProcessTaxFilesInput): Promise<Enri
       parser: parseActivoBankPdf,
       brokerName: 'ActivoBank',
     },
+    {
+      file: input.freedom24Pdf,
+      parser: parseFreedom24Pdf,
+      brokerName: 'Freedom24',
+    },
   ];
 
   for (const parseJob of parseJobs) {
@@ -196,6 +204,11 @@ export async function processBrokerFiles(input: ProcessBrokerFilesInput): Promis
       file: input.activoBankPdf,
       parser: parseActivoBankPdf,
       brokerName: 'ActivoBank',
+    },
+    {
+      file: input.freedom24Pdf,
+      parser: parseFreedom24Pdf,
+      brokerName: 'Freedom24',
     },
   ];
 

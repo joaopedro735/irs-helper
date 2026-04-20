@@ -44,6 +44,8 @@
       "t212_no_rows": "Não foram encontrados dados de dividendos/juros em \"{{fileName}}\". Verifique que este é um Relatório Anual da Trading 212.",
       "activobank_wrong_file": "\"{{fileName}}\" não parece ser um extrato do ActivoBank. Por favor, carregue o ficheiro correto.",
       "activobank_no_rows": "Não foram encontrados dados de transações de ações em \"{{fileName}}\". Verifique que este é um extrato de mais-valias do ActivoBank.",
+      "freedom24_wrong_file": "\"{{fileName}}\" não parece ser um Relatório de Transações da Freedom24. Por favor, carregue o ficheiro correto.",
+      "freedom24_no_rows": "Não foram encontrados dados de dividendos ou transações em \"{{fileName}}\". Verifique que este é um Relatório da Freedom24.",
       "file_too_large": "\"{{fileName}}\" é demasiado grande para ser processado com segurança. Forneça um PDF menor.",
       "too_many_pages": "\"{{fileName}}\" tem demasiadas páginas para ser processado com segurança."
     }
@@ -82,7 +84,13 @@
     "activobank_lane": "ActivoBank",
     "activobank_report": "PDF de Mais-valias (Alienação Onerosa)",
     "activobank_warning_title": "Limitações de Leitura",
-    "activobank_warning_1": "Apenas linhas de \"Alienação Onerosa de Valores Mobiliários Estrangeiros — Ações\" são suportadas."
+    "activobank_warning_1": "Apenas linhas de \"Alienação Onerosa de Valores Mobiliários Estrangeiros — Ações\" são suportadas.",
+    "freedom24_lane": "Freedom24",
+    "freedom24_report": "PDF do Relatório de Transações",
+    "freedom24_warning_title": "Limitações de Leitura",
+    "freedom24_warning_1": "Equity swaps e outros instrumentos derivados não são importados — declare-os manualmente.",
+    "freedom24_warning_2": "Vendas cuja compra ocorreu num período fiscal anterior são ignoradas — declare-as manualmente.",
+    "freedom24_warning_3": "ADRs com prefixo ISIN 'US' (ex: ASML) são mapeados para o país 840 (EUA) — verifique o campo de país manualmente."
   },
   "report": {
     "annex_g": "Anexo G",
