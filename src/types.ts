@@ -110,7 +110,7 @@ export interface ParsedPdfData {
   rowsG18A: TaxRowG18A[];
   rowsG1q7: TaxRowG1q7[];
   /** Informational warnings from parsers (e.g. file accepted but no taxable events). */
-  warnings?: string[];
+  warnings: string[];
 }
 
 export interface TableSummary {

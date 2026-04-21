@@ -565,6 +565,7 @@ export async function parseDegiroTransactionsCsv(
         rowsG13: [],
         rowsG18A: [],
         rowsG1q7: [],
+        warnings: [],
       };
     }
 
@@ -583,5 +584,6 @@ export async function parseDegiroTransactionsCsv(
     rowsG13: [],
     rowsG18A: [],
     rowsG1q7: [],
+    warnings: [],
   };
 }
