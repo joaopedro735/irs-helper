@@ -8,6 +8,7 @@ import {
   parseXtbDividendsPdf,
 } from './pdfParser';
 import { parseDegiroTransactionsCsv } from './degiroCsvParser';
+import { parseBinanceTransactionsXlsx } from './binanceXlsxParser';
 import { enrichXmlWithGains } from './xmlModifier';
 import type { BrokerName, EnrichmentResult, ParsedPdfData } from '../types';
 
@@ -23,6 +24,7 @@ export interface ProcessTaxFilesInput {
   freedom24Pdf?: File | null;
   ibkrPdf?: File | null;
   degiroTransactionsCsv?: File | null;
+  binanceTransactionsXlsx?: File | null;
 }
 
 export interface ProcessBrokerFilesInput {
@@ -34,6 +36,7 @@ export interface ProcessBrokerFilesInput {
   freedom24Pdf?: File | null;
   ibkrPdf?: File | null;
   degiroTransactionsCsv?: File | null;
+  binanceTransactionsXlsx?: File | null;
 }
 
 export interface BrokerFilesResult {
@@ -44,7 +47,10 @@ export interface BrokerFilesResult {
     table92B: string[];
     tableG9: string[];
     tableG13: string[];
+    tableG18A: string[];
+    tableG1q7: string[];
   };
+  warnings: string[];
 }
 
 interface ParseJob {
@@ -59,6 +65,8 @@ interface AggregatedSources {
   table92B: Set<BrokerName>;
   tableG9: Set<BrokerName>;
   tableG13: Set<BrokerName>;
+  tableG18A: Set<BrokerName>;
+  tableG1q7: Set<BrokerName>;
 }
 
 function emptyParsedData(): ParsedPdfData {
@@ -68,6 +76,9 @@ function emptyParsedData(): ParsedPdfData {
     rows92B: [],
     rowsG9: [],
     rowsG13: [],
+    rowsG18A: [],
+    rowsG1q7: [],
+    warnings: [],
   };
 }
 
@@ -95,6 +106,21 @@ function mergeParsedData(target: ParsedPdfData, incoming: ParsedPdfData, brokerN
   if (incoming.rowsG13.length > 0) {
     target.rowsG13.push(...incoming.rowsG13);
     sources.tableG13.add(brokerName);
+  }
+
+  if ((incoming.rowsG18A ?? []).length > 0) {
+    target.rowsG18A.push(...(incoming.rowsG18A ?? []));
+    sources.tableG18A.add(brokerName);
+  }
+
+  if ((incoming.rowsG1q7 ?? []).length > 0) {
+    target.rowsG1q7.push(...(incoming.rowsG1q7 ?? []));
+    sources.tableG1q7.add(brokerName);
+  }
+
+  if (incoming.warnings && incoming.warnings.length > 0) {
+    if (!target.warnings) target.warnings = [];
+    target.warnings.push(...incoming.warnings);
   }
 }
 
@@ -127,6 +153,8 @@ export async function processTaxFiles(input: ProcessTaxFilesInput): Promise<Enri
     table92B: new Set<BrokerName>(),
     tableG9: new Set<BrokerName>(),
     tableG13: new Set<BrokerName>(),
+    tableG18A: new Set<BrokerName>(),
+    tableG1q7: new Set<BrokerName>(),
   };
 
   const parseJobs: ParseJob[] = [
@@ -170,6 +198,11 @@ export async function processTaxFiles(input: ProcessTaxFilesInput): Promise<Enri
       parser: file => parseDegiroTransactionsCsv(file, { targetRealizationYear: degiroTargetRealizationYear }),
       brokerName: 'DEGIRO',
     },
+    {
+      file: input.binanceTransactionsXlsx,
+      parser: parseBinanceTransactionsXlsx,
+      brokerName: 'Binance',
+    },
   ];
 
   for (const parseJob of parseJobs) {
@@ -181,8 +214,8 @@ export async function processTaxFiles(input: ProcessTaxFilesInput): Promise<Enri
     mergeParsedData(parsedData, parsed, parseJob.brokerName, sources);
   }
 
-  const totalRows = parsedData.rows8A.length + parsedData.rows92A.length + parsedData.rows92B.length + parsedData.rowsG9.length + parsedData.rowsG13.length;
-  if (totalRows === 0) {
+  const totalRows = parsedData.rows8A.length + parsedData.rows92A.length + parsedData.rows92B.length + parsedData.rowsG9.length + parsedData.rowsG13.length + parsedData.rowsG18A.length + parsedData.rowsG1q7.length;
+  if (totalRows === 0 && !(parsedData.warnings && parsedData.warnings.length > 0)) {
     throw new Error(NO_ROWS_FOUND_ERROR);
   }
 
@@ -192,6 +225,8 @@ export async function processTaxFiles(input: ProcessTaxFilesInput): Promise<Enri
     table92B: [...sources.table92B],
     tableG9: [...sources.tableG9],
     tableG13: [...sources.tableG13],
+    tableG18A: [...sources.tableG18A],
+    tableG1q7: [...sources.tableG1q7],
   });
 }
 
@@ -208,6 +243,8 @@ export async function processBrokerFiles(input: ProcessBrokerFilesInput): Promis
     table92B: new Set<BrokerName>(),
     tableG9: new Set<BrokerName>(),
     tableG13: new Set<BrokerName>(),
+    tableG18A: new Set<BrokerName>(),
+    tableG1q7: new Set<BrokerName>(),
   };
 
   const parseJobs: ParseJob[] = [
@@ -251,6 +288,11 @@ export async function processBrokerFiles(input: ProcessBrokerFilesInput): Promis
       parser: parseDegiroTransactionsCsv,
       brokerName: 'DEGIRO',
     },
+    {
+      file: input.binanceTransactionsXlsx,
+      parser: parseBinanceTransactionsXlsx,
+      brokerName: 'Binance',
+    },
   ];
 
   for (const parseJob of parseJobs) {
@@ -262,8 +304,8 @@ export async function processBrokerFiles(input: ProcessBrokerFilesInput): Promis
     mergeParsedData(parsedData, parsed, parseJob.brokerName, sources);
   }
 
-  const totalRows = parsedData.rows8A.length + parsedData.rows92A.length + parsedData.rows92B.length + parsedData.rowsG9.length + parsedData.rowsG13.length;
-  if (totalRows === 0) {
+  const totalRows = parsedData.rows8A.length + parsedData.rows92A.length + parsedData.rows92B.length + parsedData.rowsG9.length + parsedData.rowsG13.length + parsedData.rowsG18A.length + parsedData.rowsG1q7.length;
+  if (totalRows === 0 && !(parsedData.warnings && parsedData.warnings.length > 0)) {
     throw new Error(NO_ROWS_FOUND_ERROR);
   }
 
@@ -275,7 +317,10 @@ export async function processBrokerFiles(input: ProcessBrokerFilesInput): Promis
       table92B: [...sources.table92B],
       tableG9: [...sources.tableG9],
       tableG13: [...sources.tableG13],
+      tableG18A: [...sources.tableG18A],
+      tableG1q7: [...sources.tableG1q7],
     },
+    warnings: parsedData.warnings ?? [],
   };
 }
 

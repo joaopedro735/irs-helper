@@ -68,7 +68,7 @@ const xmlWithCleanQuadro09 = `<?xml version="1.0" encoding="UTF-8"?>
 
 describe('xmlModifier – enrichXmlWithGains', () => {
   it('appends a row and updates sums when there is an existing row', () => {
-    const { enrichedXml: result } = enrichXmlWithGains(xmlWithExistingRow, { rows8A: [], rows92A: [makeRow('100.00', '50.00')], rows92B: [], rowsG9: [], rowsG13: [] });
+    const { enrichedXml: result } = enrichXmlWithGains(xmlWithExistingRow, { rows8A: [], rows92A: [makeRow('100.00', '50.00')], rows92B: [], rowsG9: [], rowsG13: [], rowsG18A: [], rowsG1q7: [] });
 
     expect(result).toContain('<NLinha>952</NLinha>');
     expect(result).toContain('<ValorRealizacao>100.00</ValorRealizacao>');
@@ -78,7 +78,7 @@ describe('xmlModifier – enrichXmlWithGains', () => {
   });
 
   it('handles an empty self-closing container without producing xmlns attributes', () => {
-    const { enrichedXml: result } = enrichXmlWithGains(xmlWithEmptyContainer, { rows8A: [], rows92A: [makeRow('200.00', '150.00')], rows92B: [], rowsG9: [], rowsG13: [] });
+    const { enrichedXml: result } = enrichXmlWithGains(xmlWithEmptyContainer, { rows8A: [], rows92A: [makeRow('200.00', '150.00')], rows92B: [], rowsG9: [], rowsG13: [], rowsG18A: [], rowsG1q7: [] });
 
     expect(result).toContain('<NLinha>951</NLinha>');
     expect(result).toContain('<ValorRealizacao>200.00</ValorRealizacao>');
@@ -88,13 +88,13 @@ describe('xmlModifier – enrichXmlWithGains', () => {
   });
 
   it('returns the original xml unchanged when no rows provided', () => {
-    const result = enrichXmlWithGains(xmlWithExistingRow, { rows8A: [], rows92A: [], rows92B: [], rowsG9: [], rowsG13: [] });
+    const result = enrichXmlWithGains(xmlWithExistingRow, { rows8A: [], rows92A: [], rows92B: [], rowsG9: [], rowsG13: [], rowsG18A: [], rowsG1q7: [] });
     expect(result.enrichedXml).toBe(xmlWithExistingRow);
   });
 
   it('correctly sums multiple new rows', () => {
     const rows = [makeRow('100.00', '80.00'), makeRow('50.00', '40.00')];
-    const { enrichedXml: result } = enrichXmlWithGains(xmlWithEmptyContainer, { rows8A: [], rows92A: rows, rows92B: [], rowsG9: [], rowsG13: [] });
+    const { enrichedXml: result } = enrichXmlWithGains(xmlWithEmptyContainer, { rows8A: [], rows92A: rows, rows92B: [], rowsG9: [], rowsG13: [], rowsG18A: [], rowsG1q7: [] });
 
     expect(result).toContain('<NLinha>951</NLinha>');
     expect(result).toContain('<NLinha>952</NLinha>');
@@ -103,7 +103,7 @@ describe('xmlModifier – enrichXmlWithGains', () => {
   });
 
   it('handles completely clean AnexoJ with self-closing <Quadro09/>', () => {
-    const { enrichedXml: result } = enrichXmlWithGains(xmlWithCleanQuadro09, { rows8A: [], rows92A: [makeRow('20.00', '10.00')], rows92B: [], rowsG9: [], rowsG13: [] });
+    const { enrichedXml: result } = enrichXmlWithGains(xmlWithCleanQuadro09, { rows8A: [], rows92A: [makeRow('20.00', '10.00')], rows92B: [], rowsG9: [], rowsG13: [], rowsG18A: [], rowsG1q7: [] });
 
     expect(result).toContain('<Quadro09>');
     expect(result).toContain('</Quadro09>');
@@ -124,7 +124,9 @@ describe('xmlModifier – enrichXmlWithGains', () => {
         codPaisContraparte: '620'
       }],
       rowsG9: [],
-      rowsG13: []
+      rowsG13: [],
+      rowsG18A: [],
+      rowsG1q7: [],
     });
 
     expect(result).toContain('<AnexoJq092BT01-Linha numero="1">');
@@ -145,7 +147,9 @@ describe('xmlModifier – enrichXmlWithGains', () => {
       rows92A: [],
       rows92B: [],
       rowsG9: [],
-      rowsG13: []
+      rowsG13: [],
+      rowsG18A: [],
+      rowsG1q7: [],
     });
 
     expect(result).toContain('<AnexoJq08AT01-Linha numero="1">');
@@ -179,7 +183,9 @@ describe('xmlModifier – enrichXmlWithGains', () => {
         titular: 'A',
         rendimentoLiquido: '-43.94',
         paisContraparte: '620'
-      }]
+      }],
+      rowsG18A: [],
+      rowsG1q7: [],
     });
 
     expect(result).toContain('<AnexoGq13T01-Linha numero="1">');

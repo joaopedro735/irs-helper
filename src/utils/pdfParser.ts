@@ -259,6 +259,8 @@ export async function parseXtbCapitalGainsPdf(file: File): Promise<ParsedPdfData
     rows92B,
     rowsG9: [],
     rowsG13,
+    rowsG18A: [],
+    rowsG1q7: [],
   };
 }
 
@@ -299,6 +301,8 @@ export async function parseXtbDividendsPdf(file: File): Promise<ParsedPdfData> {
     rows92B: [],
     rowsG9: [],
     rowsG13: [],
+    rowsG18A: [],
+    rowsG1q7: [],
   };
 }
 
@@ -338,6 +342,8 @@ export async function parseTradeRepublicPdf(file: File): Promise<ParsedPdfData> 
     rows92B: [],
     rowsG9: [],
     rowsG13: [],
+    rowsG18A: [],
+    rowsG1q7: [],
   };
 }
 
@@ -437,6 +443,8 @@ export async function parseTrading212Pdf(file: File): Promise<ParsedPdfData> {
     rows92B: [],
     rowsG9: [],
     rowsG13: [],
+    rowsG18A: [],
+    rowsG1q7: [],
   };
 }
 
@@ -536,6 +544,8 @@ export async function parseActivoBankPdf(file: File): Promise<ParsedPdfData> {
     rows92B: [],
     rowsG9,
     rowsG13: [],
+    rowsG18A: [],
+    rowsG1q7: [],
   };
 }
 
@@ -816,6 +826,8 @@ export async function parseFreedom24Pdf(file: File): Promise<ParsedPdfData> {
     rows92B: [],
     rowsG9: [],
     rowsG13: [],
+    rowsG18A: [],
+    rowsG1q7: [],
   };
 }
 
@@ -1286,5 +1298,7 @@ export async function parseIbkrPdf(file: File): Promise<ParsedPdfData> {
     rows92B: [],
     rowsG9: [],
     rowsG13,
+    rowsG18A: [],
+    rowsG1q7: [],
   };
 }

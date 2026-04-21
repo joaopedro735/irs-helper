@@ -44,6 +44,7 @@ export function HomePage() {
   const [freedom24Pdf, setFreedom24Pdf] = useState<File | null>(null);
   const [ibkrPdf, setIbkrPdf] = useState<File | null>(null);
   const [degiroTransactionsCsv, setDegiroTransactionsCsv] = useState<File | null>(null);
+  const [binanceTransactionsXlsx, setBinanceTransactionsXlsx] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<EnrichmentResult | null>(null);
   const [tablesResult, setTablesResult] = useState<BrokerFilesResult | null>(null);
@@ -119,7 +120,7 @@ export function HomePage() {
     };
   }, [showDonationPrompt]);
 
-  const hasBrokerFile = xtbCapitalGainsPdf || xtbDividendsPdf || tradeRepublicPdf || trading212Pdf || activoBankPdf || freedom24Pdf || ibkrPdf || degiroTransactionsCsv;
+  const hasBrokerFile = xtbCapitalGainsPdf || xtbDividendsPdf || tradeRepublicPdf || trading212Pdf || activoBankPdf || freedom24Pdf || ibkrPdf || degiroTransactionsCsv || binanceTransactionsXlsx;
 
   const brokerSections: BrokerSection[] = useMemo(
     () => [
@@ -252,8 +253,26 @@ export function HomePage() {
           },
         ],
       },
+      {
+        badge: 'BNB',
+        badgeClass: 'broker-badge--binance',
+        laneKey: 'uploader.binance_lane',
+        warningTitleKey: 'uploader.binance_warning_title',
+        warningKeys: [
+          'uploader.binance_warning_1',
+          'uploader.binance_warning_2',
+          'uploader.binance_warning_3',
+          'uploader.binance_warning_4',
+        ],
+        uploaders: [{
+          labelKey: 'uploader.binance_report',
+          accept: '.xlsx,.xls',
+          file: binanceTransactionsXlsx,
+          setFile: setBinanceTransactionsXlsx,
+        }],
+      },
     ],
-    [xtbCapitalGainsPdf, xtbDividendsPdf, tradeRepublicPdf, trading212Pdf, activoBankPdf, freedom24Pdf, ibkrPdf, degiroTransactionsCsv],
+    [xtbCapitalGainsPdf, xtbDividendsPdf, tradeRepublicPdf, trading212Pdf, activoBankPdf, freedom24Pdf, ibkrPdf, degiroTransactionsCsv, binanceTransactionsXlsx],
   );
 
   const canProcess = workflowMode === 'enrich'
@@ -280,6 +299,7 @@ export function HomePage() {
           freedom24Pdf,
           ibkrPdf,
           degiroTransactionsCsv,
+          binanceTransactionsXlsx,
         });
         setResult(enrichmentResult);
       } else {
@@ -292,6 +312,7 @@ export function HomePage() {
           freedom24Pdf,
           ibkrPdf,
           degiroTransactionsCsv,
+          binanceTransactionsXlsx,
         });
         setTablesResult(brokerResult);
       }
@@ -333,6 +354,7 @@ export function HomePage() {
   };
 
   const hasResult = result || tablesResult;
+  const resultWarnings = result?.warnings ?? tablesResult?.warnings ?? [];
 
   return (
     <>
@@ -475,6 +497,19 @@ export function HomePage() {
             <div className="status-msg status-error">
               <AlertCircle size={20} />
               {error}
+            </div>
+          )}
+
+          {resultWarnings.length > 0 && (
+            <div className="status-msg status-warning">
+              <Info size={20} style={{ flexShrink: 0 }} />
+              <div>
+                {resultWarnings.map((key) => (
+                  <p key={key} style={{ margin: 0 }}>
+                    {t(key, { fileName: binanceTransactionsXlsx?.name ?? '' })}
+                  </p>
+                ))}
+              </div>
             </div>
           )}
 

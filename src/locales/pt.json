@@ -54,7 +54,10 @@
       "ibkr_wrongFile": "\"{{fileName}}\" não parece ser um Extrato de Atividade IBKR. Por favor, carregue o ficheiro correto.",
       "ibkr_noData": "Não foram encontrados dados de transações, dividendos ou juros em \"{{fileName}}\". Verifique que este é um Extrato de Atividade IBKR.",
       "file_too_large": "\"{{fileName}}\" é demasiado grande para ser processado com segurança. Forneça um PDF menor.",
-      "too_many_pages": "\"{{fileName}}\" tem demasiadas páginas para ser processado com segurança."
+      "too_many_pages": "\"{{fileName}}\" tem demasiadas páginas para ser processado com segurança.",
+      "binance_wrong_file": "\"{{fileName}}\" não parece ser um export suportado do Histórico de Transações Binance. Esperava uma linha de cabeçalho com colunas como UTC Time, Operation, Coin e Change.",
+      "binance_no_rows": "Não foram encontradas mais-valias de criptoativos em \"{{fileName}}\". Verifique se este export Binance contém transações de compra/venda.",
+      "binance_no_sells": "\"{{fileName}}\" contém compras de criptoativos mas nenhuma venda por EUR. Apenas vendas de cripto por EUR geram linhas no IRS."
     }
   },
   "uploader": {
@@ -108,7 +111,14 @@
     "freedom24_warning_2": "Vendas cuja compra ocorreu num período fiscal anterior são ignoradas — declare-as manualmente.",
     "freedom24_warning_3": "ADRs com prefixo ISIN 'US' (ex: ASML) são mapeados para o país 840 (EUA) — verifique o campo de país manualmente.",
     "ibkr_lane": "Interactive Brokers",
-    "ibkr_activityStatement": "Extrato de Atividade IBKR (PDF)"
+    "ibkr_activityStatement": "Extrato de Atividade IBKR (PDF)",
+    "binance_lane": "Binance",
+    "binance_report": "Histórico de Transações XLSX",
+    "binance_warning_title": "Limitações do Parser",
+    "binance_warning_1": "Apenas trades cripto-para-EUR geram linhas no IRS. Trocas cripto-para-cripto são tratadas como substituições de lotes.",
+    "binance_warning_2": "Recompensas de staking, distribuições e juros criam lotes de aquisição — só são declarados quando vendidos.",
+    "binance_warning_3": "O país da entidade gestora é por defeito França (250). Verifique se corresponde à sua entidade contratante Binance.",
+    "binance_warning_4": "As taxas só são incluídas quando diretamente associadas a uma trade de compra ou venda."
   },
   "warnings": {
     "ibkr_title": "Limitações IBKR",
@@ -143,6 +153,15 @@
       "title": "Quadro 9.2B",
       "subtitle": "Outros rendimentos de capitais"
     },
+    "quadro_g18a": {
+      "title": "Quadro 18A",
+      "subtitle": "Criptoativos — Detidos < 365 dias"
+    },
+    "quadro_g1q7": {
+      "title": "Quadro 7 (G1)",
+      "subtitle": "Criptoativos — Detidos ≥ 365 dias (Isentos)"
+    },
+    "annex_g1": "Anexo G1",
     "totals": {
       "gross_income": "Rendimento Bruto",
       "tax_paid_abroad": "Imposto Pago no Estrangeiro",

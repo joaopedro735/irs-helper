@@ -139,6 +139,8 @@ describe('processTaxFiles', () => {
       rows92B: [],
       rowsG9: [],
       rowsG13: [],
+      rowsG18A: [],
+      rowsG1q7: [],
     });
 
     const result = await processTaxFiles({

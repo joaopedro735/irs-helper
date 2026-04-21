@@ -1,5 +1,5 @@
 /** Broker labels used in enrichment summaries. */
-export type BrokerName = 'XTB' | 'Trade Republic' | 'Trading 212' | 'ActivoBank' | 'Freedom24' | 'IBKR' | 'DEGIRO';
+export type BrokerName = 'XTB' | 'Trade Republic' | 'Trading 212' | 'ActivoBank' | 'Freedom24' | 'IBKR' | 'DEGIRO' | 'Binance';
 
 /** Common fields shared by IRS table rows that include country information. */
 export interface BaseTaxRow {
@@ -62,6 +62,38 @@ export interface TaxRowG13 {
   paisContraparte: string;
 }
 
+/** Anexo G - Quadro 18A row (crypto assets held < 365 days, taxable). */
+export interface TaxRowG18A {
+  titular: string;
+  codPaisEntGestora: string;
+  anoRealizacao: string;
+  mesRealizacao: string;
+  diaRealizacao: string;
+  valorRealizacao: string;
+  anoAquisicao: string;
+  mesAquisicao: string;
+  diaAquisicao: string;
+  valorAquisicao: string;
+  despesasEncargos: string;
+  codPaisContraparte: string;
+}
+
+/** Anexo G1 - Quadro 7 row (crypto assets held >= 365 days, exempt). */
+export interface TaxRowG1q7 {
+  titular: string;
+  codPaisEntGestora: string;
+  anoRealizacao: string;
+  mesRealizacao: string;
+  diaRealizacao: string;
+  valorRealizacao: string;
+  anoAquisicao: string;
+  mesAquisicao: string;
+  diaAquisicao: string;
+  valorAquisicao: string;
+  despesasEncargos: string;
+  codPaisContraparte: string;
+}
+
 /** Parsed broker data normalized to IRS table rows. */
 export interface ParsedPdfData {
   rows8A: TaxRow8A[];
@@ -69,6 +101,10 @@ export interface ParsedPdfData {
   rows92B: TaxRow92B[];
   rowsG9: TaxRowG9[];
   rowsG13: TaxRowG13[];
+  rowsG18A: TaxRowG18A[];
+  rowsG1q7: TaxRowG1q7[];
+  /** Informational warnings from parsers (e.g. file accepted but no taxable events). */
+  warnings?: string[];
 }
 
 export interface TableSummary {
@@ -86,6 +122,8 @@ export interface EnrichmentSummary {
   table92B: TableSummary;
   tableG9: TableSummary;
   tableG13: TableSummary;
+  tableG18A: TableSummary;
+  tableG1q7: TableSummary;
   /** Total rows across all tables */
   totalRowsAdded: number;
 }
@@ -94,4 +132,5 @@ export interface EnrichmentResult {
   enrichedXml: string;
   originalXml: string;
   summary: EnrichmentSummary;
+  warnings?: string[];
 }
