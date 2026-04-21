@@ -438,6 +438,67 @@ body {
   background: var(--accent-hover);
 }
 
+.broker-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.broker-selector__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.broker-selector__title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.broker-selector__hint,
+.broker-selector__empty {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.broker-selector__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.broker-selector__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--broker-group-border);
+  background: var(--broker-group-bg);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.broker-selector__option:hover {
+  border-color: var(--accent-primary);
+  transform: translateY(-1px);
+}
+
+.broker-selector__option--selected {
+  border-color: color-mix(in oklab, var(--accent-primary) 55%, var(--broker-group-border));
+  background: color-mix(in oklab, var(--accent-primary) 12%, var(--broker-group-bg));
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.12);
+}
+
+.broker-selector__option-label {
+  font-size: 0.83rem;
+  font-weight: 600;
+}
+
 /* =========================================================
    Broker Groups
    ========================================================= */

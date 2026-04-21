@@ -22,6 +22,7 @@ interface BrokerUploader {
 }
 
 interface BrokerSection {
+  id: string;
   badge: string;
   badgeClass: string;
   laneKey: string;
@@ -46,6 +47,7 @@ export function HomePage() {
   const [degiroTransactionsCsv, setDegiroTransactionsCsv] = useState<File | null>(null);
   const [binanceTransactionsXlsx, setBinanceTransactionsXlsx] = useState<File | null>(null);
   const [revolutConsolidatedPdf, setRevolutConsolidatedPdf] = useState<File | null>(null);
+  const [selectedBrokerIds, setSelectedBrokerIds] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<EnrichmentResult | null>(null);
   const [tablesResult, setTablesResult] = useState<BrokerFilesResult | null>(null);
@@ -126,6 +128,7 @@ export function HomePage() {
   const brokerSections: BrokerSection[] = useMemo(
     () => [
       {
+        id: 'xtb',
         badge: getBrokerBadgeMeta('xtb')?.shortLabel ?? 'XTB',
         badgeClass: getBrokerBadgeMeta('xtb')?.badgeClass ?? 'broker-badge--xtb',
         laneKey: 'uploader.xtb_lane',
@@ -151,6 +154,7 @@ export function HomePage() {
         ],
       },
       {
+        id: 'trade-republic',
         badge: getBrokerBadgeMeta('trade republic')?.shortLabel ?? 'TR',
         badgeClass: getBrokerBadgeMeta('trade republic')?.badgeClass ?? 'broker-badge--tr',
         laneKey: 'uploader.tr_lane',
@@ -165,6 +169,7 @@ export function HomePage() {
         ],
       },
       {
+        id: 'trading-212',
         badge: getBrokerBadgeMeta('trading 212')?.shortLabel ?? 'T212',
         badgeClass: getBrokerBadgeMeta('trading 212')?.badgeClass ?? 'broker-badge--t212',
         laneKey: 'uploader.t212_lane',
@@ -179,6 +184,7 @@ export function HomePage() {
         ],
       },
       {
+        id: 'activobank',
         badge: getBrokerBadgeMeta('activobank')?.shortLabel ?? 'AB',
         badgeClass: getBrokerBadgeMeta('activobank')?.badgeClass ?? 'broker-badge--activobank',
         laneKey: 'uploader.activobank_lane',
@@ -193,6 +199,7 @@ export function HomePage() {
         ],
       },
       {
+        id: 'degiro',
         badge: getBrokerBadgeMeta('degiro')?.shortLabel ?? 'DEGIRO',
         badgeClass: getBrokerBadgeMeta('degiro')?.badgeClass ?? 'broker-badge--degiro',
         laneKey: 'uploader.degiro_lane',
@@ -212,6 +219,7 @@ export function HomePage() {
         ],
       },
       {
+        id: 'freedom24',
         badge: getBrokerBadgeMeta('freedom24')?.shortLabel ?? 'F24',
         badgeClass: getBrokerBadgeMeta('freedom24')?.badgeClass ?? 'broker-badge--freedom24',
         laneKey: 'uploader.freedom24_lane',
@@ -230,6 +238,7 @@ export function HomePage() {
         ],
       },
       {
+        id: 'ibkr',
         badge: getBrokerBadgeMeta('ibkr')?.shortLabel ?? 'IBKR',
         badgeClass: getBrokerBadgeMeta('ibkr')?.badgeClass ?? 'broker-badge--ibkr',
         laneKey: 'uploader.ibkr_lane',
@@ -248,6 +257,7 @@ export function HomePage() {
         ],
       },
       {
+        id: 'binance',
         badge: getBrokerBadgeMeta('binance')?.shortLabel ?? 'BNB',
         badgeClass: getBrokerBadgeMeta('binance')?.badgeClass ?? 'broker-badge--binance',
         laneKey: 'uploader.binance_lane',
@@ -265,6 +275,7 @@ export function HomePage() {
         }],
       },
       {
+        id: 'revolut',
         badge: getBrokerBadgeMeta('revolut')?.shortLabel ?? 'REV',
         badgeClass: getBrokerBadgeMeta('revolut')?.badgeClass ?? 'broker-badge--revolut',
         laneKey: 'uploader.revolut_lane',
@@ -285,6 +296,23 @@ export function HomePage() {
     ],
     [xtbCapitalGainsPdf, xtbDividendsPdf, tradeRepublicPdf, trading212Pdf, activoBankPdf, freedom24Pdf, ibkrPdf, degiroTransactionsCsv, binanceTransactionsXlsx, revolutConsolidatedPdf],
   );
+
+  const visibleBrokerSections = useMemo(
+    () => brokerSections.filter(section => selectedBrokerIds.includes(section.id)),
+    [brokerSections, selectedBrokerIds],
+  );
+
+  const handleBrokerSelectionToggle = useCallback((brokerId: string) => {
+    setSelectedBrokerIds(current => {
+      if (current.includes(brokerId)) {
+        const brokerSection = brokerSections.find(section => section.id === brokerId);
+        brokerSection?.uploaders.forEach(uploader => uploader.setFile(null));
+        return current.filter(id => id !== brokerId);
+      }
+
+      return [...current, brokerId];
+    });
+  }, [brokerSections]);
 
   const canProcess = workflowMode === 'enrich'
     ? !!xmlFile && !!hasBrokerFile
@@ -438,7 +466,37 @@ export function HomePage() {
               </div>
             </div>
             <div className="category-content">
-              {brokerSections.map(section => (
+              <div className="broker-selector">
+                <div className="broker-selector__header">
+                  <p className="broker-selector__title">{t('uploader.broker_selector_title')}</p>
+                  <p className="broker-selector__hint">{t('uploader.broker_selector_hint')}</p>
+                </div>
+
+                <div className="broker-selector__list">
+                  {brokerSections.map(section => {
+                    const isSelected = selectedBrokerIds.includes(section.id);
+
+                    return (
+                      <button
+                        key={section.id}
+                        type="button"
+                        className={`broker-selector__option ${isSelected ? 'broker-selector__option--selected' : ''}`}
+                        onClick={() => handleBrokerSelectionToggle(section.id)}
+                        aria-pressed={isSelected}
+                      >
+                        <span className={`broker-badge ${section.badgeClass}`}>{section.badge}</span>
+                        <span className="broker-selector__option-label">{t(section.laneKey)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {visibleBrokerSections.length === 0 && (
+                  <p className="broker-selector__empty">{t('uploader.broker_selector_empty')}</p>
+                )}
+              </div>
+
+              {visibleBrokerSections.map(section => (
                 <div className="broker-group" key={section.laneKey}>
                   <div className="broker-header">
                     <span className={`broker-badge ${section.badgeClass}`}>{section.badge}</span>
