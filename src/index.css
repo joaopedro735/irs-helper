@@ -500,6 +500,11 @@ body {
   color: #ffffff;
 }
 
+.broker-badge--degiro {
+  background: #2563eb;
+  color: #ffffff;
+}
+
 [data-theme="light"] .broker-badge--tr {
   border-color: #000000;
 }
@@ -908,6 +913,12 @@ body {
   background: #0099fd;
   color: #ffffff;
   border-color: #007dd4;
+}
+
+.enrichment-card__source-tag--degiro {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #1d4ed8;
 }
 
 .enrichment-report__annex-group {
@@ -1667,4 +1678,3 @@ body {
     box-shadow: none;
   }
 }
-

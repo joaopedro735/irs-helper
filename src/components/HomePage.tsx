@@ -8,13 +8,14 @@ import { FileUploader } from './FileUploader';
 import { IrsTablesViewer } from './IrsTablesViewer';
 import { NO_ROWS_FOUND_ERROR, downloadXmlFile, processBrokerFiles, processTaxFiles } from '../utils/processFiles';
 import type { BrokerFilesResult } from '../utils/processFiles';
-import { PdfParsingError } from '../utils/pdfParser';
+import { BrokerParsingError } from '../utils/parserErrors';
 import type { EnrichmentResult } from '../types';
 
 type WorkflowMode = 'enrich' | 'tables';
 
 interface BrokerUploader {
   labelKey: string;
+  accept: string;
   file: File | null;
   setFile: (file: File | null) => void;
 }
@@ -42,6 +43,7 @@ export function HomePage() {
   const [activoBankPdf, setActivoBankPdf] = useState<File | null>(null);
   const [freedom24Pdf, setFreedom24Pdf] = useState<File | null>(null);
   const [ibkrPdf, setIbkrPdf] = useState<File | null>(null);
+  const [degiroTransactionsCsv, setDegiroTransactionsCsv] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<EnrichmentResult | null>(null);
   const [tablesResult, setTablesResult] = useState<BrokerFilesResult | null>(null);
@@ -117,7 +119,7 @@ export function HomePage() {
     };
   }, [showDonationPrompt]);
 
-  const hasBrokerFile = xtbCapitalGainsPdf || xtbDividendsPdf || tradeRepublicPdf || trading212Pdf || activoBankPdf || freedom24Pdf || ibkrPdf;
+  const hasBrokerFile = xtbCapitalGainsPdf || xtbDividendsPdf || tradeRepublicPdf || trading212Pdf || activoBankPdf || freedom24Pdf || ibkrPdf || degiroTransactionsCsv;
 
   const brokerSections: BrokerSection[] = useMemo(
     () => [
@@ -135,11 +137,13 @@ export function HomePage() {
         uploaders: [
           {
             labelKey: 'uploader.xtb_gains',
+            accept: '.pdf',
             file: xtbCapitalGainsPdf,
             setFile: setXtbCapitalGainsPdf,
           },
           {
             labelKey: 'uploader.xtb_dividends',
+            accept: '.pdf',
             file: xtbDividendsPdf,
             setFile: setXtbDividendsPdf,
           },
@@ -154,6 +158,7 @@ export function HomePage() {
         uploaders: [
           {
             labelKey: 'uploader.tr_report',
+            accept: '.pdf',
             file: tradeRepublicPdf,
             setFile: setTradeRepublicPdf,
           },
@@ -168,6 +173,7 @@ export function HomePage() {
         uploaders: [
           {
             labelKey: 'uploader.t212_report',
+            accept: '.pdf',
             file: trading212Pdf,
             setFile: setTrading212Pdf,
           },
@@ -182,8 +188,29 @@ export function HomePage() {
         uploaders: [
           {
             labelKey: 'uploader.activobank_report',
+            accept: '.pdf',
             file: activoBankPdf,
             setFile: setActivoBankPdf,
+          },
+        ],
+      },
+      {
+        badge: 'DEGIRO',
+        badgeClass: 'broker-badge--degiro',
+        laneKey: 'uploader.degiro_lane',
+        warningTitleKey: 'uploader.degiro_warning_title',
+        warningKeys: [
+          'uploader.degiro_warning_1',
+          'uploader.degiro_warning_2',
+          'uploader.degiro_warning_3',
+          'uploader.degiro_warning_4',
+        ],
+        uploaders: [
+          {
+            labelKey: 'uploader.degiro_report',
+            accept: '.csv',
+            file: degiroTransactionsCsv,
+            setFile: setDegiroTransactionsCsv,
           },
         ],
       },
@@ -200,6 +227,7 @@ export function HomePage() {
         uploaders: [
           {
             labelKey: 'uploader.freedom24_report',
+            accept: '.pdf',
             file: freedom24Pdf,
             setFile: setFreedom24Pdf,
           },
@@ -218,13 +246,14 @@ export function HomePage() {
         uploaders: [
           {
             labelKey: 'uploader.ibkr_activityStatement',
+            accept: '.pdf',
             file: ibkrPdf,
             setFile: setIbkrPdf,
           },
         ],
       },
     ],
-    [xtbCapitalGainsPdf, xtbDividendsPdf, tradeRepublicPdf, trading212Pdf, activoBankPdf, freedom24Pdf, ibkrPdf],
+    [xtbCapitalGainsPdf, xtbDividendsPdf, tradeRepublicPdf, trading212Pdf, activoBankPdf, freedom24Pdf, ibkrPdf, degiroTransactionsCsv],
   );
 
   const canProcess = workflowMode === 'enrich'
@@ -250,6 +279,7 @@ export function HomePage() {
           activoBankPdf,
           freedom24Pdf,
           ibkrPdf,
+          degiroTransactionsCsv,
         });
         setResult(enrichmentResult);
       } else {
@@ -261,13 +291,14 @@ export function HomePage() {
           activoBankPdf,
           freedom24Pdf,
           ibkrPdf,
+          degiroTransactionsCsv,
         });
         setTablesResult(brokerResult);
       }
     } catch (err: unknown) {
       console.error(err);
 
-      if (err instanceof PdfParsingError) {
+      if (err instanceof BrokerParsingError) {
         setError(t(err.i18nKey, err.i18nParams));
       } else if (err instanceof Error && err.message === NO_ROWS_FOUND_ERROR) {
         setError(t('app.error.no_rows'));
@@ -398,7 +429,7 @@ export function HomePage() {
                       <FileUploader
                         key={uploader.labelKey}
                         label={t(uploader.labelKey)}
-                        accept=".pdf"
+                        accept={uploader.accept}
                         onFileSelect={file => uploader.setFile(file)}
                         onRemove={() => uploader.setFile(null)}
                       />
