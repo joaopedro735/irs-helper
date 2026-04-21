@@ -11,6 +11,8 @@ const sampleCsv = `Data,Hora,Produto,ISIN,Bolsa de referência,Bolsa,Quantidade,
 
 vi.mock('./pdfParser', () => ({
   parseActivoBankPdf: vi.fn(),
+  parseFreedom24Pdf: vi.fn(),
+  parseIbkrPdf: vi.fn(),
   parseTradeRepublicPdf: vi.fn(),
   parseTrading212Pdf: vi.fn(),
   parseXtbCapitalGainsPdf: vi.fn(),
@@ -135,6 +137,7 @@ describe('processTaxFiles', () => {
       }],
       rows92A: [],
       rows92B: [],
+      rowsG9: [],
       rowsG13: [],
     });
 

@@ -25,6 +25,7 @@ const COUNTRY_NAME_TO_CODE: Record<string, string> = {
   UK: '826',
   Sweden: '752',
   Switzerland: '756',
+  Poland: '616',
 };
 
 const ISIN_PREFIX_TO_CODE: Record<string, string> = {
@@ -50,6 +51,7 @@ const ISIN_PREFIX_TO_CODE: Record<string, string> = {
   SE: '752',
   CH: '756',
   GB: '826',
+  PL: '616',
   US: '840',
 };
 

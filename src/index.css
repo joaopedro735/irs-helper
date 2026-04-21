@@ -490,6 +490,16 @@ body {
   color: #ffffff;
 }
 
+.broker-badge--freedom24 {
+  background: #00b051;
+  color: #ffffff;
+}
+
+.broker-badge--ibkr {
+  background: #D32011;
+  color: #ffffff;
+}
+
 .broker-badge--degiro {
   background: #2563eb;
   color: #ffffff;

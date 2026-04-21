@@ -41,6 +41,8 @@ export function HomePage() {
   const [tradeRepublicPdf, setTradeRepublicPdf] = useState<File | null>(null);
   const [trading212Pdf, setTrading212Pdf] = useState<File | null>(null);
   const [activoBankPdf, setActivoBankPdf] = useState<File | null>(null);
+  const [freedom24Pdf, setFreedom24Pdf] = useState<File | null>(null);
+  const [ibkrPdf, setIbkrPdf] = useState<File | null>(null);
   const [degiroTransactionsCsv, setDegiroTransactionsCsv] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<EnrichmentResult | null>(null);
@@ -117,7 +119,7 @@ export function HomePage() {
     };
   }, [showDonationPrompt]);
 
-  const hasBrokerFile = xtbCapitalGainsPdf || xtbDividendsPdf || tradeRepublicPdf || trading212Pdf || activoBankPdf || degiroTransactionsCsv;
+  const hasBrokerFile = xtbCapitalGainsPdf || xtbDividendsPdf || tradeRepublicPdf || trading212Pdf || activoBankPdf || freedom24Pdf || ibkrPdf || degiroTransactionsCsv;
 
   const brokerSections: BrokerSection[] = useMemo(
     () => [
@@ -193,11 +195,16 @@ export function HomePage() {
         ],
       },
       {
-        badge: 'DEG',
+        badge: 'DEGIRO',
         badgeClass: 'broker-badge--degiro',
         laneKey: 'uploader.degiro_lane',
         warningTitleKey: 'uploader.degiro_warning_title',
-        warningKeys: ['uploader.degiro_warning_1', 'uploader.degiro_warning_2', 'uploader.degiro_warning_3', 'uploader.degiro_warning_4'],
+        warningKeys: [
+          'uploader.degiro_warning_1',
+          'uploader.degiro_warning_2',
+          'uploader.degiro_warning_3',
+          'uploader.degiro_warning_4',
+        ],
         uploaders: [
           {
             labelKey: 'uploader.degiro_report',
@@ -207,8 +214,46 @@ export function HomePage() {
           },
         ],
       },
+      {
+        badge: 'F24',
+        badgeClass: 'broker-badge--freedom24',
+        laneKey: 'uploader.freedom24_lane',
+        warningTitleKey: 'uploader.freedom24_warning_title',
+        warningKeys: [
+          'uploader.freedom24_warning_1',
+          'uploader.freedom24_warning_2',
+          'uploader.freedom24_warning_3',
+        ],
+        uploaders: [
+          {
+            labelKey: 'uploader.freedom24_report',
+            accept: '.pdf',
+            file: freedom24Pdf,
+            setFile: setFreedom24Pdf,
+          },
+        ],
+      },
+      {
+        badge: 'IBKR',
+        badgeClass: 'broker-badge--ibkr',
+        laneKey: 'uploader.ibkr_lane',
+        warningTitleKey: 'warnings.ibkr_title',
+        warningKeys: [
+          'warnings.ibkr_multiCurrency',
+          'warnings.ibkr_adrCountry',
+          'warnings.ibkr_optionsCode',
+        ],
+        uploaders: [
+          {
+            labelKey: 'uploader.ibkr_activityStatement',
+            accept: '.pdf',
+            file: ibkrPdf,
+            setFile: setIbkrPdf,
+          },
+        ],
+      },
     ],
-    [xtbCapitalGainsPdf, xtbDividendsPdf, tradeRepublicPdf, trading212Pdf, activoBankPdf, degiroTransactionsCsv],
+    [xtbCapitalGainsPdf, xtbDividendsPdf, tradeRepublicPdf, trading212Pdf, activoBankPdf, freedom24Pdf, ibkrPdf, degiroTransactionsCsv],
   );
 
   const canProcess = workflowMode === 'enrich'
@@ -232,6 +277,8 @@ export function HomePage() {
           tradeRepublicPdf,
           trading212Pdf,
           activoBankPdf,
+          freedom24Pdf,
+          ibkrPdf,
           degiroTransactionsCsv,
         });
         setResult(enrichmentResult);
@@ -242,6 +289,8 @@ export function HomePage() {
           tradeRepublicPdf,
           trading212Pdf,
           activoBankPdf,
+          freedom24Pdf,
+          ibkrPdf,
           degiroTransactionsCsv,
         });
         setTablesResult(brokerResult);

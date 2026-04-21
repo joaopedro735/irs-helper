@@ -1,5 +1,7 @@
 import {
   parseActivoBankPdf,
+  parseFreedom24Pdf,
+  parseIbkrPdf,
   parseTradeRepublicPdf,
   parseTrading212Pdf,
   parseXtbCapitalGainsPdf,
@@ -18,6 +20,8 @@ export interface ProcessTaxFilesInput {
   tradeRepublicPdf?: File | null;
   trading212Pdf?: File | null;
   activoBankPdf?: File | null;
+  freedom24Pdf?: File | null;
+  ibkrPdf?: File | null;
   degiroTransactionsCsv?: File | null;
 }
 
@@ -27,6 +31,8 @@ export interface ProcessBrokerFilesInput {
   tradeRepublicPdf?: File | null;
   trading212Pdf?: File | null;
   activoBankPdf?: File | null;
+  freedom24Pdf?: File | null;
+  ibkrPdf?: File | null;
   degiroTransactionsCsv?: File | null;
 }
 
@@ -150,6 +156,16 @@ export async function processTaxFiles(input: ProcessTaxFilesInput): Promise<Enri
       brokerName: 'ActivoBank',
     },
     {
+      file: input.freedom24Pdf,
+      parser: parseFreedom24Pdf,
+      brokerName: 'Freedom24',
+    },
+    {
+      file: input.ibkrPdf,
+      parser: parseIbkrPdf,
+      brokerName: 'IBKR',
+    },
+    {
       file: input.degiroTransactionsCsv,
       parser: file => parseDegiroTransactionsCsv(file, { targetRealizationYear: degiroTargetRealizationYear }),
       brokerName: 'DEGIRO',
@@ -219,6 +235,16 @@ export async function processBrokerFiles(input: ProcessBrokerFilesInput): Promis
       file: input.activoBankPdf,
       parser: parseActivoBankPdf,
       brokerName: 'ActivoBank',
+    },
+    {
+      file: input.freedom24Pdf,
+      parser: parseFreedom24Pdf,
+      brokerName: 'Freedom24',
+    },
+    {
+      file: input.ibkrPdf,
+      parser: parseIbkrPdf,
+      brokerName: 'IBKR',
     },
     {
       file: input.degiroTransactionsCsv,

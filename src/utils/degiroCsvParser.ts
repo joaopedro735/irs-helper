@@ -561,6 +561,7 @@ export async function parseDegiroTransactionsCsv(
         rows8A: [],
         rows92A: [],
         rows92B: [],
+        rowsG9: [],
         rowsG13: [],
       };
     }
