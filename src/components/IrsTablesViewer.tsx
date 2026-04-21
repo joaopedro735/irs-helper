@@ -16,7 +16,7 @@ interface IrsTablesViewerProps {
   };
 }
 
-interface TableConfig<T> {
+interface TableConfig<T extends { _source?: string }> {
   titleKey: string;
   subtitleKey: string;
   icon: React.ReactNode;
@@ -39,7 +39,7 @@ function formatCurrency(value: number): string {
   return `${value.toLocaleString('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 }
 
-function DataTable<T>({ config }: { config: TableConfig<T> }) {
+function DataTable<T extends { _source?: string }>({ config }: { config: TableConfig<T> }) {
   const { t } = useTranslation();
 
   if (config.rows.length === 0) return null;
@@ -69,6 +69,7 @@ function DataTable<T>({ config }: { config: TableConfig<T> }) {
         <table className="irs-table">
           <thead>
             <tr>
+              <th>{t('tables.source_column')}</th>
               {config.columns.map(col => (
                 <th key={col.header}>{col.header}</th>
               ))}
@@ -77,6 +78,13 @@ function DataTable<T>({ config }: { config: TableConfig<T> }) {
           <tbody>
             {config.rows.map((row, i) => (
               <tr key={i}>
+                <td className="irs-table__source-cell">
+                  {row._source && (
+                    <span className={`broker-badge ${getBrokerBadgeMeta(row._source)?.badgeClass ?? ''}`}>
+                      {getBrokerBadgeMeta(row._source)?.shortLabel ?? row._source}
+                    </span>
+                  )}
+                </td>
                 {config.columns.map(col => (
                   <td key={col.header}>{col.accessor(row, i)}</td>
                 ))}

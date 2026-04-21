@@ -4,6 +4,8 @@ export type BrokerName = 'XTB' | 'Trade Republic' | 'Trading 212' | 'ActivoBank'
 /** Common fields shared by IRS table rows that include country information. */
 export interface BaseTaxRow {
   codPais: string;
+  /** Broker that originated this row, stamped at merge time. */
+  _source?: BrokerName;
 }
 
 /** Anexo J - Quadro 9.2 A row (capital gains sells/acquisitions). */
@@ -39,6 +41,7 @@ export interface TaxRow8A extends BaseTaxRow {
 
 /** Anexo G - Quadro 9 row (shares sold through a Portuguese entity). */
 export interface TaxRowG9 {
+  _source?: BrokerName;
   titular: string;
   nif: string;
   codEncargos: string;
@@ -56,6 +59,7 @@ export interface TaxRowG9 {
 
 /** Anexo G - Quadro 13 row (CFDs/derivatives). */
 export interface TaxRowG13 {
+  _source?: BrokerName;
   codigoOperacao: string;
   titular: string;
   rendimentoLiquido: string;
@@ -64,6 +68,7 @@ export interface TaxRowG13 {
 
 /** Anexo G - Quadro 18A row (crypto assets held < 365 days, taxable). */
 export interface TaxRowG18A {
+  _source?: BrokerName;
   titular: string;
   codPaisEntGestora: string;
   anoRealizacao: string;
@@ -80,6 +85,7 @@ export interface TaxRowG18A {
 
 /** Anexo G1 - Quadro 7 row (crypto assets held >= 365 days, exempt). */
 export interface TaxRowG1q7 {
+  _source?: BrokerName;
   titular: string;
   codPaisEntGestora: string;
   anoRealizacao: string;

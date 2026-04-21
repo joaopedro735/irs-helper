@@ -560,9 +560,9 @@ body {
   --broker-binance-bg: #f3ba2f;
   --broker-binance-fg: #111827;
   --broker-binance-border: #d9a520;
-  --broker-revolut-bg: #0b0b0f;
-  --broker-revolut-fg: #f5f7fa;
-  --broker-revolut-border: #2a2d34;
+  --broker-revolut-bg: #ffffff;
+  --broker-revolut-fg: #0b0b0f;
+  --broker-revolut-border: #d1d5db;
 }
 
 .broker-badge--xtb {
@@ -1241,6 +1241,14 @@ body {
 
 .irs-table tbody tr:last-child td {
   border-bottom: none;
+}
+
+.irs-table__source-cell {
+  width: 1px;
+  white-space: nowrap;
+  padding: 0.35rem 0.6rem;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .irs-table tbody tr:hover {

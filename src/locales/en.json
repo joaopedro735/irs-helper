@@ -184,7 +184,8 @@
   "tables": {
     "title": "IRS Tables",
     "subtitle": "{{count}} total rows across {{activeTables}} table(s).",
-    "control_sum": "Control Sum"
+    "control_sum": "Control Sum",
+    "source_column": "Broker"
   },
   "diff": {
     "title": "Before / After Comparison",

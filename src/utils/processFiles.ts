@@ -87,37 +87,37 @@ function emptyParsedData(): ParsedPdfData {
 
 function mergeParsedData(target: ParsedPdfData, incoming: ParsedPdfData, brokerName: BrokerName, sources: AggregatedSources): void {
   if (incoming.rows8A.length > 0) {
-    target.rows8A.push(...incoming.rows8A);
+    target.rows8A.push(...incoming.rows8A.map(r => ({ ...r, _source: brokerName })));
     sources.table8A.add(brokerName);
   }
 
   if (incoming.rows92A.length > 0) {
-    target.rows92A.push(...incoming.rows92A);
+    target.rows92A.push(...incoming.rows92A.map(r => ({ ...r, _source: brokerName })));
     sources.table92A.add(brokerName);
   }
 
   if (incoming.rows92B.length > 0) {
-    target.rows92B.push(...incoming.rows92B);
+    target.rows92B.push(...incoming.rows92B.map(r => ({ ...r, _source: brokerName })));
     sources.table92B.add(brokerName);
   }
 
   if (incoming.rowsG9.length > 0) {
-    target.rowsG9.push(...incoming.rowsG9);
+    target.rowsG9.push(...incoming.rowsG9.map(r => ({ ...r, _source: brokerName })));
     sources.tableG9.add(brokerName);
   }
 
   if (incoming.rowsG13.length > 0) {
-    target.rowsG13.push(...incoming.rowsG13);
+    target.rowsG13.push(...incoming.rowsG13.map(r => ({ ...r, _source: brokerName })));
     sources.tableG13.add(brokerName);
   }
 
   if ((incoming.rowsG18A ?? []).length > 0) {
-    target.rowsG18A.push(...(incoming.rowsG18A ?? []));
+    target.rowsG18A.push(...(incoming.rowsG18A ?? []).map(r => ({ ...r, _source: brokerName })));
     sources.tableG18A.add(brokerName);
   }
 
   if ((incoming.rowsG1q7 ?? []).length > 0) {
-    target.rowsG1q7.push(...(incoming.rowsG1q7 ?? []));
+    target.rowsG1q7.push(...(incoming.rowsG1q7 ?? []).map(r => ({ ...r, _source: brokerName })));
     sources.tableG1q7.add(brokerName);
   }
 

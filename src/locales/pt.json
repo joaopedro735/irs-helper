@@ -184,7 +184,8 @@
   "tables": {
     "title": "Tabelas IRS",
     "subtitle": "{{count}} linhas no total em {{activeTables}} tabela(s).",
-    "control_sum": "Soma de Controlo"
+    "control_sum": "Soma de Controlo",
+    "source_column": "Corretora"
   },
   "diff": {
     "title": "Comparação Antes / Depois",
