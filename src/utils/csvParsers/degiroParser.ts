@@ -1,6 +1,6 @@
-import type { ParsedPdfData, TaxRow } from '../types';
-import { resolveCountryCodeFromIsin } from './brokerCountries';
-import { BrokerParsingError } from './parserErrors';
+import type { ParsedPdfData, TaxRow } from '../../types';
+import { resolveCountryCodeFromIsin } from '../brokerCountries';
+import { BrokerParsingError } from '../parserErrors';
 
 const EXPECTED_HEADERS = [
   'Data',

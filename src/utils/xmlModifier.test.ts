@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { enrichXmlWithGains } from './xmlModifier';
-import type { ParsedPdfData, TaxRow } from '../types';
+import type { ParsedPdfData, TaxRow, TaxRowG9, TaxRowG18A, TaxRowG1q7 } from '../types';
 
 const makeParsedData = (overrides: Partial<ParsedPdfData>): ParsedPdfData => ({
   rows8A: [],
@@ -190,5 +190,275 @@ describe('xmlModifier – enrichXmlWithGains', () => {
     expect(result).toContain('<AnexoGq13T01SomaC01>-43.94</AnexoGq13T01SomaC01>');
     // Should not inject into AnexoJ when only G13 rows present
     expect(result).not.toContain('<AnexoJq08AT01-Linha');
+  });
+
+  // ---- validateXmlShape tests ----
+
+  it('throws when XML has no Modelo3 root node', () => {
+    const badXml = '<?xml version="1.0"?><Root><AnexoJ/></Root>';
+    expect(() => enrichXmlWithGains(badXml, makeParsedData({ rows92A: [makeRow('10.00', '5.00')] }))).toThrow(
+      'Invalid XML: expected a Modelo3 root node.'
+    );
+  });
+
+  it('throws when 8A rows present but no AnexoJ', () => {
+    const noAnexoJ = '<?xml version="1.0"?><Modelo3IRSv2026><AnexoG/></Modelo3IRSv2026>';
+    expect(() => enrichXmlWithGains(noAnexoJ, makeParsedData({
+      rows8A: [{ codigo: 'E11', codPais: '840', rendimentoBruto: '10.00', impostoPago: '0.00' }],
+    }))).toThrow('Anexo J is required');
+  });
+
+  it('throws when 92A rows present but no AnexoJ', () => {
+    const noAnexoJ = '<?xml version="1.0"?><Modelo3IRSv2026><AnexoG/></Modelo3IRSv2026>';
+    expect(() => enrichXmlWithGains(noAnexoJ, makeParsedData({
+      rows92A: [makeRow('10.00', '5.00')],
+    }))).toThrow('Anexo J is required');
+  });
+
+  it('throws when G9 rows present but no AnexoG', () => {
+    const noAnexoG = `<?xml version="1.0"?><Modelo3IRSv2026><AnexoJ><Quadro09/></AnexoJ></Modelo3IRSv2026>`;
+    const g9Row: TaxRowG9 = {
+      titular: 'A', nif: '500734305', codEncargos: 'G01',
+      anoRealizacao: '2025', mesRealizacao: '6', diaRealizacao: '1',
+      valorRealizacao: '100.00', anoAquisicao: '2024', mesAquisicao: '1',
+      diaAquisicao: '1', valorAquisicao: '50.00', despesasEncargos: '0.00',
+      paisContraparte: '620',
+    };
+    expect(() => enrichXmlWithGains(noAnexoG, makeParsedData({ rowsG9: [g9Row] }))).toThrow(
+      'Anexo G is required'
+    );
+  });
+
+  it('throws when G18A rows present but no AnexoG', () => {
+    const noAnexoG = `<?xml version="1.0"?><Modelo3IRSv2026><AnexoJ><Quadro09/></AnexoJ></Modelo3IRSv2026>`;
+    const g18aRow: TaxRowG18A = {
+      titular: 'A', codPaisEntGestora: '250',
+      anoRealizacao: '2025', mesRealizacao: '6', diaRealizacao: '1',
+      valorRealizacao: '600.00', anoAquisicao: '2025', mesAquisicao: '1',
+      diaAquisicao: '15', valorAquisicao: '500.00', despesasEncargos: '0.00',
+      codPaisContraparte: '250',
+    };
+    expect(() => enrichXmlWithGains(noAnexoG, makeParsedData({ rowsG18A: [g18aRow] }))).toThrow(
+      'Anexo G is required for crypto'
+    );
+  });
+
+  it('throws when G1q7 rows present but no AnexoG1', () => {
+    const noAnexoG1 = `<?xml version="1.0"?><Modelo3IRSv2026><AnexoG><Quadro18/></AnexoG></Modelo3IRSv2026>`;
+    const g1q7Row: TaxRowG1q7 = {
+      titular: 'A', codPaisEntGestora: '250',
+      anoRealizacao: '2025', mesRealizacao: '6', diaRealizacao: '1',
+      valorRealizacao: '2000.00', anoAquisicao: '2023', mesAquisicao: '1',
+      diaAquisicao: '1', valorAquisicao: '1500.00', despesasEncargos: '0.00',
+      codPaisContraparte: '250',
+    };
+    expect(() => enrichXmlWithGains(noAnexoG1, makeParsedData({ rowsG1q7: [g1q7Row] }))).toThrow(
+      'Anexo G1 is required'
+    );
+  });
+
+  it('does not throw when annexes match data requirements', () => {
+    const validXml = `<?xml version="1.0"?>
+<Modelo3IRSv2026>
+  <AnexoG><Quadro09/><Quadro13/><Quadro18/></AnexoG>
+  <AnexoG1><Quadro07/></AnexoG1>
+  <AnexoJ><Quadro08/><Quadro09/></AnexoJ>
+</Modelo3IRSv2026>`;
+    expect(() => enrichXmlWithGains(validXml, makeParsedData({
+      rows8A: [{ codigo: 'E11', codPais: '840', rendimentoBruto: '10.00', impostoPago: '0.00' }],
+      rowsG13: [{ codigoOperacao: 'G51', titular: 'A', rendimentoLiquido: '50.00', paisContraparte: '620' }],
+    }))).not.toThrow();
+  });
+
+  // ---- Anexo G Quadro 9 (G9) injection tests ----
+
+  it('injects Anexo G Quadro 9 rows for ActivoBank-style data', () => {
+    const xmlWithAnexoG = `<?xml version="1.0" encoding="UTF-8"?>
+<Modelo3IRSv2026 xmlns="http://www.dgci.gov.pt/2009/Modelo3IRSv2026">
+  <AnexoG>
+    <Quadro09/>
+  </AnexoG>
+</Modelo3IRSv2026>`;
+
+    const g9Row: TaxRowG9 = {
+      titular: 'A', nif: '500734305', codEncargos: 'G01',
+      anoRealizacao: '2025', mesRealizacao: '6', diaRealizacao: '1',
+      valorRealizacao: '100.00', anoAquisicao: '2024', mesAquisicao: '1',
+      diaAquisicao: '15', valorAquisicao: '80.00', despesasEncargos: '2.50',
+      paisContraparte: '620',
+    };
+
+    const { enrichedXml: result } = enrichXmlWithGains(xmlWithAnexoG, makeParsedData({ rowsG9: [g9Row] }));
+
+    expect(result).toContain('<AnexoGq09T01-Linha numero="1">');
+    expect(result).toContain('<Titular>A</Titular>');
+    expect(result).toContain('<NIF>500734305</NIF>');
+    expect(result).toContain('<CodEncargos>G01</CodEncargos>');
+    expect(result).toContain('<ValorRealizacao>100.00</ValorRealizacao>');
+    expect(result).toContain('<ValorAquisicao>80.00</ValorAquisicao>');
+    expect(result).toContain('<DespesasEncargos>2.50</DespesasEncargos>');
+    expect(result).toContain('<AnexoGq09T01SomaC01>100.00</AnexoGq09T01SomaC01>');
+    expect(result).toContain('<AnexoGq09T01SomaC02>80.00</AnexoGq09T01SomaC02>');
+    expect(result).toContain('<AnexoGq09T01SomaC03>2.50</AnexoGq09T01SomaC03>');
+  });
+
+  // ---- Anexo G Quadro 18A (crypto < 365 days) injection tests ----
+
+  it('injects Anexo G Quadro 18A rows for crypto capital gains', () => {
+    const xmlWithAnexoG = `<?xml version="1.0" encoding="UTF-8"?>
+<Modelo3IRSv2026 xmlns="http://www.dgci.gov.pt/2009/Modelo3IRSv2026">
+  <AnexoG>
+    <Quadro18/>
+  </AnexoG>
+</Modelo3IRSv2026>`;
+
+    const g18aRow: TaxRowG18A = {
+      titular: 'A', codPaisEntGestora: '250',
+      anoRealizacao: '2025', mesRealizacao: '6', diaRealizacao: '1',
+      valorRealizacao: '600.00', anoAquisicao: '2025', mesAquisicao: '1',
+      diaAquisicao: '15', valorAquisicao: '500.00', despesasEncargos: '4.00',
+      codPaisContraparte: '250',
+    };
+
+    const { enrichedXml: result } = enrichXmlWithGains(xmlWithAnexoG, makeParsedData({ rowsG18A: [g18aRow] }));
+
+    expect(result).toContain('<AnexoGq18AT01-Linha numero="1">');
+    expect(result).toContain('<Titular>A</Titular>');
+    expect(result).toContain('<CodPaisEntGestora>250</CodPaisEntGestora>');
+    expect(result).toContain('<ValorRealizacao>600.00</ValorRealizacao>');
+    expect(result).toContain('<ValorAquisicao>500.00</ValorAquisicao>');
+    expect(result).toContain('<AnexoGq18AT01SomaC01>600.00</AnexoGq18AT01SomaC01>');
+    expect(result).toContain('<AnexoGq18AT01SomaC02>500.00</AnexoGq18AT01SomaC02>');
+    expect(result).toContain('<AnexoGq18AT01SomaC03>4.00</AnexoGq18AT01SomaC03>');
+  });
+
+  // ---- Anexo G1 Quadro 7 (crypto >= 365 days) injection tests ----
+
+  it('injects Anexo G1 Quadro 7 rows for crypto held >= 365 days', () => {
+    const xmlWithAnexoG1 = `<?xml version="1.0" encoding="UTF-8"?>
+<Modelo3IRSv2026 xmlns="http://www.dgci.gov.pt/2009/Modelo3IRSv2026">
+  <AnexoG1>
+    <Quadro07/>
+  </AnexoG1>
+</Modelo3IRSv2026>`;
+
+    const g1q7Row: TaxRowG1q7 = {
+      titular: 'A', codPaisEntGestora: '250',
+      anoRealizacao: '2025', mesRealizacao: '6', diaRealizacao: '1',
+      valorRealizacao: '2000.00', anoAquisicao: '2023', mesAquisicao: '1',
+      diaAquisicao: '1', valorAquisicao: '1500.00', despesasEncargos: '0.00',
+      codPaisContraparte: '250',
+    };
+
+    const { enrichedXml: result } = enrichXmlWithGains(xmlWithAnexoG1, makeParsedData({ rowsG1q7: [g1q7Row] }));
+
+    expect(result).toContain('<AnexoG1q07T01-Linha numero="1">');
+    expect(result).toContain('<Titular>A</Titular>');
+    expect(result).toContain('<CodPaisEntGestora>250</CodPaisEntGestora>');
+    expect(result).toContain('<ValorRealizacao>2000.00</ValorRealizacao>');
+    expect(result).toContain('<ValorAquisicao>1500.00</ValorAquisicao>');
+    expect(result).toContain('<AnexoG1q07T01SomaC01>2000.00</AnexoG1q07T01SomaC01>');
+    expect(result).toContain('<AnexoG1q07T01SomaC02>1500.00</AnexoG1q07T01SomaC02>');
+    expect(result).toContain('<AnexoG1q07T01SomaC03>0.00</AnexoG1q07T01SomaC03>');
+  });
+
+  // ---- Combined injection: multiple table types simultaneously ----
+
+  it('injects 8A + 92A + G13 simultaneously without corrupting XML', () => {
+    const xmlMulti = `<?xml version="1.0" encoding="UTF-8"?>
+<Modelo3IRSv2026 xmlns="http://www.dgci.gov.pt/2009/Modelo3IRSv2026">
+  <AnexoG>
+    <Quadro09></Quadro09>
+    <Quadro13></Quadro13>
+  </AnexoG>
+  <AnexoJ>
+    <Quadro08></Quadro08>
+    <Quadro09>
+      <AnexoJq092AT01/>
+    </Quadro09>
+  </AnexoJ>
+</Modelo3IRSv2026>`;
+
+    const { enrichedXml: result, summary } = enrichXmlWithGains(xmlMulti, makeParsedData({
+      rows8A: [{ codigo: 'E11', codPais: '840', rendimentoBruto: '3.71', impostoPago: '0.57' }],
+      rows92A: [makeRow('100.00', '50.00')],
+      rowsG13: [{ codigoOperacao: 'G51', titular: 'A', rendimentoLiquido: '-43.94', paisContraparte: '620' }],
+    }));
+
+    expect(result).toContain('<AnexoJq08AT01-Linha');
+    expect(result).toContain('<AnexoJq092AT01-Linha');
+    expect(result).toContain('<AnexoGq13T01-Linha');
+    expect(summary.totalRowsAdded).toBe(3);
+  });
+
+  // ---- EnrichmentSummary correctness tests ----
+
+  it('returns correct totalRowsAdded across all tables', () => {
+    const xmlFull = `<?xml version="1.0"?>
+<Modelo3IRSv2026>
+  <AnexoJ>
+    <Quadro08></Quadro08>
+    <Quadro09>
+      <AnexoJq092AT01/>
+    </Quadro09>
+  </AnexoJ>
+</Modelo3IRSv2026>`;
+
+    const { summary } = enrichXmlWithGains(xmlFull, makeParsedData({
+      rows8A: [
+        { codigo: 'E11', codPais: '840', rendimentoBruto: '10.00', impostoPago: '1.00' },
+        { codigo: 'E21', codPais: '372', rendimentoBruto: '5.00', impostoPago: '0.00' },
+      ],
+      rows92A: [makeRow('100.00', '50.00')],
+    }));
+
+    expect(summary.table8A.rowsAdded).toBe(2);
+    expect(summary.table92A.rowsAdded).toBe(1);
+    expect(summary.totalRowsAdded).toBe(3);
+  });
+
+  it('returns correct formatted totals for 8A rows', () => {
+    const xmlFull = `<?xml version="1.0"?>
+<Modelo3IRSv2026>
+  <AnexoJ><Quadro08/><Quadro09/></AnexoJ>
+</Modelo3IRSv2026>`;
+
+    const { summary } = enrichXmlWithGains(xmlFull, makeParsedData({
+      rows8A: [
+        { codigo: 'E11', codPais: '840', rendimentoBruto: '10.50', impostoPago: '1.25' },
+        { codigo: 'E11', codPais: '276', rendimentoBruto: '5.25', impostoPago: '0.75' },
+      ],
+    }));
+
+    expect(summary.table8A.totals).toEqual([
+      { label: 'report.totals.gross_income', value: '15.75', currency: true },
+      { label: 'report.totals.tax_paid_abroad', value: '2.00', currency: true },
+    ]);
+  });
+
+  it('returns sources from passed sources argument', () => {
+    const xmlFull = `<?xml version="1.0"?>
+<Modelo3IRSv2026>
+  <AnexoJ><Quadro08/><Quadro09/></AnexoJ>
+</Modelo3IRSv2026>`;
+
+    const { summary } = enrichXmlWithGains(xmlFull, makeParsedData({
+      rows8A: [{ codigo: 'E11', codPais: '840', rendimentoBruto: '10.00', impostoPago: '0.00' }],
+    }), {
+      table8A: ['Trade Republic', 'Trading 212'],
+      table92A: [], table92B: [], tableG9: [], tableG13: [], tableG18A: [], tableG1q7: [],
+    });
+
+    expect(summary.table8A.sources).toEqual(['Trade Republic', 'Trading 212']);
+  });
+
+  it('returns empty totals and sources for zero-row tables', () => {
+    const { summary } = enrichXmlWithGains(xmlWithExistingRow, makeParsedData({}));
+
+    expect(summary.table8A.totals).toEqual([]);
+    expect(summary.table8A.sources).toEqual([]);
+    expect(summary.table92A.totals).toEqual([]);
+    expect(summary.tableG13.totals).toEqual([]);
+    expect(summary.totalRowsAdded).toBe(0);
   });
 });

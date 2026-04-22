@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { processBrokerFiles, processTaxFiles } from './processFiles';
+import { downloadXmlFile, processBrokerFiles, processTaxFiles } from './processFiles';
 import { BrokerParsingError } from './parserErrors';
-import { parseTradeRepublicPdf } from './pdfParser';
+import { parseTradeRepublicPdf } from './pdfParsers/tradeRepublicParser';
+import { parseTrading212Pdf } from './pdfParsers/trading212Parser';
+import { parseActivoBankPdf } from './pdfParsers/activoBankParser';
 
 const sampleCsv = `Data,Hora,Produto,ISIN,Bolsa de referência,Bolsa,Quantidade,Preços,,Valor local,,Valor EUR,Taxa de Câmbio,Taxa Autofx,Custos de transação e/ou taxas de terceiros,Total EUR,ID da Ordem,
 31-05-2023,09:04,VANGUARD S&P 500 UCITS ETF USD DIS,IE00B3XXRP09,EAM,XAMS,-1,"74,4890",EUR,"74,49",EUR,"74,49",,"0,00",,"74,49",,7de27f2e-430f-4bd0-9110-af75f4c65a89
@@ -9,14 +11,26 @@ const sampleCsv = `Data,Hora,Produto,ISIN,Bolsa de referência,Bolsa,Quantidade,
 02-10-2020,09:47,VANGUARD S&P 500 UCITS ETF USD DIS,IE00B3XXRP09,EAM,XAMS,2,"54,0000",EUR,"-108,00",EUR,"-108,00",,"0,00",,"-108,00",,a5d2688d-38db-41cd-a9a0-681f778201d4
 `;
 
-vi.mock('./pdfParser', () => ({
-  parseActivoBankPdf: vi.fn(),
-  parseFreedom24Pdf: vi.fn(),
-  parseIbkrPdf: vi.fn(),
-  parseTradeRepublicPdf: vi.fn(),
-  parseTrading212Pdf: vi.fn(),
+vi.mock('./pdfParsers/xtbParser', () => ({
   parseXtbCapitalGainsPdf: vi.fn(),
   parseXtbDividendsPdf: vi.fn(),
+}));
+vi.mock('./pdfParsers/tradeRepublicParser', () => ({
+  parseTradeRepublicPdf: vi.fn(),
+}));
+vi.mock('./pdfParsers/trading212Parser', () => ({
+  parseTrading212Pdf: vi.fn(),
+}));
+vi.mock('./pdfParsers/activoBankParser', () => ({
+  parseActivoBankPdf: vi.fn(),
+}));
+vi.mock('./pdfParsers/freedom24Parser', () => ({
+  parseFreedom24Pdf: vi.fn(),
+}));
+vi.mock('./pdfParsers/ibkrParser', () => ({
+  parseIbkrPdf: vi.fn(),
+}));
+vi.mock('./pdfParsers/revolutParser', () => ({
   parseRevolutConsolidatedPdf: vi.fn(),
 }));
 
@@ -181,5 +195,157 @@ describe('processTaxFiles', () => {
       xmlFile: new File([xml], 'irs.xml', { type: 'application/xml' }),
       degiroTransactionsCsv: new File([degiroCsv], 'degiro.csv', { type: 'text/csv' }),
     })).rejects.toThrow('NO_ROWS_FOUND');
+  });
+
+  it('merges multiple broker sources and tracks them in summary', async () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Modelo3IRSv2025 xmlns="http://www.dgci.gov.pt/2009/Modelo3IRSv2025">
+  <AnexoJ>
+    <Quadro08/>
+    <Quadro09>
+      <AnexoJq092AT01/>
+      <AnexoJq092AT01SomaC01>0.00</AnexoJq092AT01SomaC01>
+      <AnexoJq092AT01SomaC02>0.00</AnexoJq092AT01SomaC02>
+      <AnexoJq092AT01SomaC03>0.00</AnexoJq092AT01SomaC03>
+      <AnexoJq092AT01SomaC04>0.00</AnexoJq092AT01SomaC04>
+      <AnexoJq08AT01/>
+    </Quadro09>
+  </AnexoJ>
+</Modelo3IRSv2025>`;
+
+    vi.mocked(parseTradeRepublicPdf).mockResolvedValueOnce({
+      rows8A: [{ codigo: 'E21', codPais: '276', rendimentoBruto: '10.00', impostoPago: '0.00' }],
+      rows92A: [], rows92B: [], rowsG9: [], rowsG13: [], rowsG18A: [], rowsG1q7: [], warnings: [],
+    });
+    vi.mocked(parseTrading212Pdf).mockResolvedValueOnce({
+      rows8A: [{ codigo: 'E11', codPais: '840', rendimentoBruto: '5.00', impostoPago: '1.00' }],
+      rows92A: [], rows92B: [], rowsG9: [], rowsG13: [], rowsG18A: [], rowsG1q7: [], warnings: [],
+    });
+
+    const result = await processTaxFiles({
+      xmlFile: new File([xml], 'irs.xml', { type: 'application/xml' }),
+      tradeRepublicPdf: new File(['dummy'], 'tr.pdf', { type: 'application/pdf' }),
+      trading212Pdf: new File(['dummy'], 't212.pdf', { type: 'application/pdf' }),
+    });
+
+    expect(result.summary.table8A.rowsAdded).toBe(2);
+    expect(result.summary.table8A.sources).toContain('Trade Republic');
+    expect(result.summary.table8A.sources).toContain('Trading 212');
+    expect(result.summary.totalRowsAdded).toBe(2);
+  });
+});
+
+describe('processBrokerFiles – multi-broker', () => {
+  it('aggregates multiple broker sources and stamps _source on rows', async () => {
+    vi.mocked(parseTradeRepublicPdf).mockResolvedValueOnce({
+      rows8A: [{ codigo: 'E21', codPais: '276', rendimentoBruto: '10.00', impostoPago: '0.00' }],
+      rows92A: [], rows92B: [], rowsG9: [], rowsG13: [], rowsG18A: [], rowsG1q7: [], warnings: [],
+    });
+    vi.mocked(parseTrading212Pdf).mockResolvedValueOnce({
+      rows8A: [{ codigo: 'E11', codPais: '840', rendimentoBruto: '5.00', impostoPago: '1.00' }],
+      rows92A: [], rows92B: [], rowsG9: [], rowsG13: [], rowsG18A: [], rowsG1q7: [], warnings: [],
+    });
+
+    const result = await processBrokerFiles({
+      tradeRepublicPdf: new File(['dummy'], 'tr.pdf', { type: 'application/pdf' }),
+      trading212Pdf: new File(['dummy'], 't212.pdf', { type: 'application/pdf' }),
+    });
+
+    expect(result.parsedData.rows8A).toHaveLength(2);
+    expect(result.parsedData.rows8A[0]._source).toBe('Trade Republic');
+    expect(result.parsedData.rows8A[1]._source).toBe('Trading 212');
+    expect(result.sources.table8A).toContain('Trade Republic');
+    expect(result.sources.table8A).toContain('Trading 212');
+  });
+});
+
+describe('downloadXmlFile', () => {
+  it('creates a blob, triggers download, and revokes URL', () => {
+    const mockClick = vi.fn();
+    const mockAppendChild = vi.spyOn(document.body, 'appendChild').mockImplementation(node => node);
+    const mockRemoveChild = vi.spyOn(document.body, 'removeChild').mockImplementation(node => node);
+    vi.spyOn(document, 'createElement').mockReturnValue({
+      set href(_: string) {},
+      set download(_: string) {},
+      click: mockClick,
+    } as unknown as HTMLAnchorElement);
+
+    const mockCreateObjectURL = vi.fn().mockReturnValue('blob:mock-url');
+    const mockRevokeObjectURL = vi.fn();
+    globalThis.URL.createObjectURL = mockCreateObjectURL;
+    globalThis.URL.revokeObjectURL = mockRevokeObjectURL;
+
+    downloadXmlFile('<xml/>', 'test.xml');
+
+    expect(mockCreateObjectURL).toHaveBeenCalledOnce();
+    expect(mockClick).toHaveBeenCalledOnce();
+    expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+
+    mockAppendChild.mockRestore();
+    mockRemoveChild.mockRestore();
+  });
+});
+
+describe('processBrokerFiles – row type coverage', () => {
+  it('merges rows92B, rowsG9, rowsG13, rowsG18A, rowsG1q7, and warnings', async () => {
+    vi.mocked(parseTradeRepublicPdf).mockResolvedValueOnce({
+      rows8A: [],
+      rows92A: [],
+      rows92B: [{ codigo: 'G98', codPais: '840', rendimentoLiquido: '25.00', impostoPagoNoEstrangeiro: '0.00', codPaisContraparte: '840' }],
+      rowsG9: [],
+      rowsG13: [{ codigoOperacao: 'G51', titular: 'A', rendimentoLiquido: '-10.00', paisContraparte: '840' }],
+      rowsG18A: [{ titular: 'A', codPaisEntGestora: '250', anoRealizacao: '2025', mesRealizacao: '6', diaRealizacao: '1', valorRealizacao: '500.00', anoAquisicao: '2025', mesAquisicao: '1', diaAquisicao: '15', valorAquisicao: '400.00', despesasEncargos: '2.00', codPaisContraparte: '250' }],
+      rowsG1q7: [{ titular: 'A', codPaisEntGestora: '250', anoRealizacao: '2025', mesRealizacao: '6', diaRealizacao: '1', valorRealizacao: '300.00', anoAquisicao: '2023', mesAquisicao: '1', diaAquisicao: '15', valorAquisicao: '200.00', despesasEncargos: '1.00', codPaisContraparte: '250' }],
+      warnings: ['test_warning'],
+    });
+
+    vi.mocked(parseActivoBankPdf).mockResolvedValueOnce({
+      rows8A: [],
+      rows92A: [],
+      rows92B: [],
+      rowsG9: [{ titular: 'A', nif: '500734305', codEncargos: 'G01', anoRealizacao: '2025', mesRealizacao: '6', diaRealizacao: '16', valorRealizacao: '1058.40', anoAquisicao: '2024', mesAquisicao: '6', diaAquisicao: '26', valorAquisicao: '1040.40', despesasEncargos: '5.00', paisContraparte: '840' }],
+      rowsG13: [],
+      rowsG18A: [],
+      rowsG1q7: [],
+      warnings: [],
+    });
+
+    const result = await processBrokerFiles({
+      tradeRepublicPdf: new File(['dummy'], 'tr.pdf'),
+      activoBankPdf: new File(['dummy'], 'ab.pdf'),
+    });
+
+    expect(result.parsedData.rows92B).toHaveLength(1);
+    expect(result.parsedData.rows92B[0]._source).toBe('Trade Republic');
+    expect(result.parsedData.rowsG9).toHaveLength(1);
+    expect(result.parsedData.rowsG9[0]._source).toBe('ActivoBank');
+    expect(result.parsedData.rowsG13).toHaveLength(1);
+    expect(result.parsedData.rowsG18A).toHaveLength(1);
+    expect(result.parsedData.rowsG1q7).toHaveLength(1);
+    expect(result.warnings).toEqual(['test_warning']);
+    expect(result.sources.table92B).toContain('Trade Republic');
+    expect(result.sources.tableG9).toContain('ActivoBank');
+    expect(result.sources.tableG13).toContain('Trade Republic');
+    expect(result.sources.tableG18A).toContain('Trade Republic');
+    expect(result.sources.tableG1q7).toContain('Trade Republic');
+  });
+
+  it('throws NO_ROWS_FOUND when no broker files are provided', async () => {
+    await expect(processBrokerFiles({})).rejects.toThrow('NO_ROWS_FOUND');
+  });
+
+  it('does not throw when warnings are returned but no data rows', async () => {
+    vi.mocked(parseTradeRepublicPdf).mockResolvedValueOnce({
+      rows8A: [], rows92A: [], rows92B: [], rowsG9: [], rowsG13: [],
+      rowsG18A: [], rowsG1q7: [],
+      warnings: ['parser.error.binance_no_sells'],
+    });
+
+    const result = await processBrokerFiles({
+      tradeRepublicPdf: new File(['dummy'], 'tr.pdf'),
+    });
+
+    expect(result.warnings).toEqual(['parser.error.binance_no_sells']);
+    expect(result.parsedData.rows8A).toHaveLength(0);
   });
 });

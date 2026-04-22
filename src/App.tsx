@@ -80,7 +80,7 @@ function App() {
             <span>Github</span>
           </a>
           <a
-            href="mailto:irshelper.festival366@passinbox.com?subject=IRS%20Helper%20-%20Feedback"
+            href="mailto:irs-helper@proton.me?subject=IRS%20Helper%20-%20Feedback"
             className="app-footer__link"
             aria-label={t('contact.tooltip')}
             title={t('contact.tooltip')}

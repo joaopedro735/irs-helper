@@ -2,13 +2,13 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   parseXtbCapitalGainsPdf,
   parseXtbDividendsPdf,
-  parseTradeRepublicPdf,
-  parseTrading212Pdf,
-  parseIbkrPdf,
-  parseRevolutConsolidatedPdf,
-  resolveCountryCode,
-  PdfParsingError,
-} from './pdfParser';
+} from './xtbParser';
+import { parseTradeRepublicPdf } from './tradeRepublicParser';
+import { parseTrading212Pdf } from './trading212Parser';
+import { parseIbkrPdf } from './ibkrParser';
+import { parseRevolutConsolidatedPdf } from './revolutParser';
+import { resolveCountryCode } from '../brokerCountries';
+import { BrokerParsingError } from '../parserErrors';
 import * as pdfjsLib from 'pdfjs-dist';
 
 vi.mock('pdfjs-dist', () => {
@@ -89,7 +89,7 @@ describe('parseXtbCapitalGainsPdf', () => {
     ]);
 
     const fakeFile = new File([''], 'xtb_dividends.pdf');
-    await expect(parseXtbCapitalGainsPdf(fakeFile)).rejects.toThrow(PdfParsingError);
+    await expect(parseXtbCapitalGainsPdf(fakeFile)).rejects.toThrow(BrokerParsingError);
     await expect(parseXtbCapitalGainsPdf(fakeFile)).rejects.toMatchObject({
       i18nKey: 'parser.error.xtb_wrong_file_gains',
     });
@@ -102,7 +102,7 @@ describe('parseXtbCapitalGainsPdf', () => {
     ]);
 
     const fakeFile = new File([''], 'empty_gains.pdf');
-    await expect(parseXtbCapitalGainsPdf(fakeFile)).rejects.toThrow(PdfParsingError);
+    await expect(parseXtbCapitalGainsPdf(fakeFile)).rejects.toThrow(BrokerParsingError);
     await expect(parseXtbCapitalGainsPdf(fakeFile)).rejects.toMatchObject({
       i18nKey: 'parser.error.xtb_no_gains_rows',
     });
@@ -132,7 +132,7 @@ describe('parseXtbDividendsPdf', () => {
     ]);
 
     const fakeFile = new File([''], 'xtb_gains.pdf');
-    await expect(parseXtbDividendsPdf(fakeFile)).rejects.toThrow(PdfParsingError);
+    await expect(parseXtbDividendsPdf(fakeFile)).rejects.toThrow(BrokerParsingError);
     await expect(parseXtbDividendsPdf(fakeFile)).rejects.toMatchObject({
       i18nKey: 'parser.error.xtb_wrong_file_dividends',
     });
@@ -144,7 +144,7 @@ describe('parseXtbDividendsPdf', () => {
     ]);
 
     const fakeFile = new File([''], 'empty_div.pdf');
-    await expect(parseXtbDividendsPdf(fakeFile)).rejects.toThrow(PdfParsingError);
+    await expect(parseXtbDividendsPdf(fakeFile)).rejects.toThrow(BrokerParsingError);
     await expect(parseXtbDividendsPdf(fakeFile)).rejects.toMatchObject({
       i18nKey: 'parser.error.xtb_no_dividends_rows',
     });
@@ -183,7 +183,7 @@ describe('parseTradeRepublicPdf', () => {
     ]);
 
     const fakeFile = new File([''], 'not_tr.pdf');
-    await expect(parseTradeRepublicPdf(fakeFile)).rejects.toThrow(PdfParsingError);
+    await expect(parseTradeRepublicPdf(fakeFile)).rejects.toThrow(BrokerParsingError);
     await expect(parseTradeRepublicPdf(fakeFile)).rejects.toMatchObject({
       i18nKey: 'parser.error.tr_wrong_file',
     });
@@ -195,7 +195,7 @@ describe('parseTradeRepublicPdf', () => {
     ]);
 
     const fakeFile = new File([''], 'tr_empty.pdf');
-    await expect(parseTradeRepublicPdf(fakeFile)).rejects.toThrow(PdfParsingError);
+    await expect(parseTradeRepublicPdf(fakeFile)).rejects.toThrow(BrokerParsingError);
     await expect(parseTradeRepublicPdf(fakeFile)).rejects.toMatchObject({
       i18nKey: 'parser.error.tr_no_rows',
     });
@@ -281,7 +281,7 @@ describe('parseTrading212Pdf', () => {
     ]);
 
     const fakeFile = new File([''], 'not_t212.pdf');
-    await expect(parseTrading212Pdf(fakeFile)).rejects.toThrow(PdfParsingError);
+    await expect(parseTrading212Pdf(fakeFile)).rejects.toThrow(BrokerParsingError);
     await expect(parseTrading212Pdf(fakeFile)).rejects.toMatchObject({
       i18nKey: 'parser.error.t212_wrong_file',
     });
@@ -293,7 +293,7 @@ describe('parseTrading212Pdf', () => {
     ]);
 
     const fakeFile = new File([''], 't212_empty.pdf');
-    await expect(parseTrading212Pdf(fakeFile)).rejects.toThrow(PdfParsingError);
+    await expect(parseTrading212Pdf(fakeFile)).rejects.toThrow(BrokerParsingError);
     await expect(parseTrading212Pdf(fakeFile)).rejects.toMatchObject({
       i18nKey: 'parser.error.t212_no_rows',
     });

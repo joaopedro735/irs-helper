@@ -24,7 +24,6 @@ dist-ssr
 *.sw?
 
 # Test artifacts
-playwright-report/
 test-results/
 coverage/
 

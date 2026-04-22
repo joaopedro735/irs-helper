@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as XLSX from 'xlsx';
-import { parseBinanceTransactionsXlsx } from './binanceXlsxParser';
-import { BrokerParsingError } from './parserErrors';
+import { parseBinanceTransactionsXlsx } from './binanceParser';
+import { BrokerParsingError } from '../parserErrors';
 
 vi.mock('xlsx', () => ({
   read: vi.fn(),
@@ -311,5 +311,86 @@ describe('parseBinanceTransactionsXlsx', () => {
 
     expect(data.rowsG18A).toHaveLength(0);
     expect(data.warnings).toContain('parser.error.binance_no_sells');
+  });
+
+  it('returns binance_no_rows warning when file has no recognizable transactions', async () => {
+    mockXlsxData(toMatrix([
+      { User_ID: '1', UTC_Time: '2025-01-15 10:00:00', Account: 'Spot', Operation: 'Unknown Op', Coin: 'BTC', Change: 0.01, Remark: '' },
+    ]));
+
+    const data = await parseBinanceTransactionsXlsx(makeFile());
+
+    expect(data.rowsG18A).toHaveLength(0);
+    expect(data.rowsG1q7).toHaveLength(0);
+    expect(data.warnings).toContain('parser.error.binance_no_rows');
+  });
+
+  it('handles partial lot consumption when selling less than a full lot', async () => {
+    mockXlsxData(toMatrix([
+      // Buy 1 BTC for 10000 EUR
+      { User_ID: '1', UTC_Time: '2025-01-01 10:00:00', Account: 'Spot', Operation: 'Buy', Coin: 'BTC', Change: 1, Remark: '' },
+      { User_ID: '1', UTC_Time: '2025-01-01 10:00:00', Account: 'Spot', Operation: 'Buy', Coin: 'EUR', Change: -10000, Remark: '' },
+      // Sell 0.5 BTC for 6000 EUR
+      { User_ID: '1', UTC_Time: '2025-06-01 10:00:00', Account: 'Spot', Operation: 'Sell', Coin: 'BTC', Change: -0.5, Remark: '' },
+      { User_ID: '1', UTC_Time: '2025-06-01 10:00:00', Account: 'Spot', Operation: 'Sell', Coin: 'EUR', Change: 6000, Remark: '' },
+      // Sell remaining 0.5 BTC for 7000 EUR
+      { User_ID: '1', UTC_Time: '2025-09-01 10:00:00', Account: 'Spot', Operation: 'Sell', Coin: 'BTC', Change: -0.5, Remark: '' },
+      { User_ID: '1', UTC_Time: '2025-09-01 10:00:00', Account: 'Spot', Operation: 'Sell', Coin: 'EUR', Change: 7000, Remark: '' },
+    ]));
+
+    const data = await parseBinanceTransactionsXlsx(makeFile());
+
+    expect(data.rowsG18A).toHaveLength(2);
+    expect(data.rowsG18A[0].valorRealizacao).toBe('6000.00');
+    expect(data.rowsG18A[0].valorAquisicao).toBe('5000.00');
+    expect(data.rowsG18A[1].valorRealizacao).toBe('7000.00');
+    expect(data.rowsG18A[1].valorAquisicao).toBe('5000.00');
+  });
+
+  it('handles Small Assets Exchange as a sell operation', async () => {
+    mockXlsxData(toMatrix([
+      { User_ID: '1', UTC_Time: '2025-01-15 10:00:00', Account: 'Spot', Operation: 'Buy', Coin: 'DOGE', Change: 1000, Remark: '' },
+      { User_ID: '1', UTC_Time: '2025-01-15 10:00:00', Account: 'Spot', Operation: 'Buy', Coin: 'EUR', Change: -100, Remark: '' },
+      { User_ID: '1', UTC_Time: '2025-06-01 10:00:00', Account: 'Spot', Operation: 'Small Assets Exchange', Coin: 'DOGE', Change: -1000, Remark: '' },
+      { User_ID: '1', UTC_Time: '2025-06-01 10:00:00', Account: 'Spot', Operation: 'Small Assets Exchange', Coin: 'EUR', Change: 50, Remark: '' },
+    ]));
+
+    const data = await parseBinanceTransactionsXlsx(makeFile());
+
+    expect(data.rowsG18A).toHaveLength(1);
+    expect(data.rowsG18A[0].valorRealizacao).toBe('50.00');
+    expect(data.rowsG18A[0].valorAquisicao).toBe('100.00');
+  });
+
+  it('coerces Excel serial date numbers to timestamps', async () => {
+    vi.mocked(XLSX.SSF!.parse_date_code!).mockImplementation((n: number) => {
+      if (n < 45700) return { y: 2025, m: 1, d: 15, H: 10, M: 0, S: 0 } as ReturnType<typeof XLSX.SSF.parse_date_code>;
+      return { y: 2025, m: 6, d: 1, H: 10, M: 0, S: 0 } as ReturnType<typeof XLSX.SSF.parse_date_code>;
+    });
+
+    mockXlsxData([
+      DEFAULT_HEADERS,
+      ['1', 45672, 'Spot', 'Buy', 'BTC', 0.01, ''],
+      ['1', 45672, 'Spot', 'Buy', 'EUR', -500, ''],
+      ['1', 45824, 'Spot', 'Sell', 'BTC', -0.01, ''],
+      ['1', 45824, 'Spot', 'Sell', 'EUR', 600, ''],
+    ]);
+
+    const data = await parseBinanceTransactionsXlsx(makeFile());
+
+    expect(data.rowsG18A).toHaveLength(1);
+    expect(data.rowsG18A[0].anoRealizacao).toBe('2025');
+    expect(data.rowsG18A[0].mesRealizacao).toBe('6');
+    expect(data.rowsG18A[0].anoAquisicao).toBe('2025');
+    expect(data.rowsG18A[0].mesAquisicao).toBe('1');
+  });
+
+  it('throws BrokerParsingError with binance_no_rows when data rows are empty', async () => {
+    mockXlsxData([DEFAULT_HEADERS]);
+
+    await expect(parseBinanceTransactionsXlsx(makeFile())).rejects.toThrow(BrokerParsingError);
+    await expect(parseBinanceTransactionsXlsx(makeFile())).rejects.toMatchObject({
+      i18nKey: 'parser.error.binance_no_rows',
+    });
   });
 });

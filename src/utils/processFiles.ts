@@ -1,15 +1,12 @@
-import {
-  parseActivoBankPdf,
-  parseFreedom24Pdf,
-  parseIbkrPdf,
-  parseRevolutConsolidatedPdf,
-  parseTradeRepublicPdf,
-  parseTrading212Pdf,
-  parseXtbCapitalGainsPdf,
-  parseXtbDividendsPdf,
-} from './pdfParser';
-import { parseDegiroTransactionsCsv } from './degiroCsvParser';
-import { parseBinanceTransactionsXlsx } from './binanceXlsxParser';
+import { parseXtbCapitalGainsPdf, parseXtbDividendsPdf } from './pdfParsers/xtbParser';
+import { parseTradeRepublicPdf } from './pdfParsers/tradeRepublicParser';
+import { parseTrading212Pdf } from './pdfParsers/trading212Parser';
+import { parseActivoBankPdf } from './pdfParsers/activoBankParser';
+import { parseFreedom24Pdf } from './pdfParsers/freedom24Parser';
+import { parseIbkrPdf } from './pdfParsers/ibkrParser';
+import { parseRevolutConsolidatedPdf } from './pdfParsers/revolutParser';
+import { parseDegiroTransactionsCsv } from './csvParsers/degiroParser';
+import { parseBinanceTransactionsXlsx } from './xlsxParsers/binanceParser';
 import { enrichXmlWithGains } from './xmlModifier';
 import type { BrokerName, EnrichmentResult, ParsedPdfData } from '../types';
 

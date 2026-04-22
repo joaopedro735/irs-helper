@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { parseDegiroTransactionsCsv } from './degiroCsvParser';
-import { BrokerParsingError } from './parserErrors';
+import { parseDegiroTransactionsCsv } from './degiroParser';
+import { BrokerParsingError } from '../parserErrors';
 
 const sampleCsv = `Data,Hora,Produto,ISIN,Bolsa de referência,Bolsa,Quantidade,Preços,,Valor local,,Valor EUR,Taxa de Câmbio,Taxa Autofx,Custos de transação e/ou taxas de terceiros,Total EUR,ID da Ordem,
 31-05-2023,09:04,VANGUARD S&P 500 UCITS ETF USD DIS,IE00B3XXRP09,EAM,XAMS,-1,"74,4890",EUR,"74,49",EUR,"74,49",,"0,00",,"74,49",,7de27f2e-430f-4bd0-9110-af75f4c65a89
@@ -265,6 +265,41 @@ describe('parseDegiroTransactionsCsv', () => {
 
   it('fails on unsupported headers', async () => {
     const fakeFile = new File(['Date,Time,ISIN\n'], 'degiro.csv', { type: 'text/csv' });
+    await expect(parseDegiroTransactionsCsv(fakeFile)).rejects.toThrow(BrokerParsingError);
+    await expect(parseDegiroTransactionsCsv(fakeFile)).rejects.toMatchObject({
+      i18nKey: 'parser.error.degiro_wrong_file',
+    });
+  });
+
+  it('throws degiro_no_rows when file has only buy transactions (no sells)', async () => {
+    const csv = `Data,Hora,Produto,ISIN,Bolsa de referência,Bolsa,Quantidade,Preços,,Valor local,,Valor EUR,Taxa de Câmbio,Taxa Autofx,Custos de transação e/ou taxas de terceiros,Total EUR,ID da Ordem,
+01-01-2020,10:00,ETF,IE00B3XXRP09,EAM,XAMS,1,"10,0000",EUR,"-10,00",EUR,"-10,00",,"0,00",,"-10,00",,buy-1
+`;
+
+    const fakeFile = new File([csv], 'degiro.csv', { type: 'text/csv' });
+    await expect(parseDegiroTransactionsCsv(fakeFile)).rejects.toThrow(BrokerParsingError);
+    await expect(parseDegiroTransactionsCsv(fakeFile)).rejects.toMatchObject({
+      i18nKey: 'parser.error.degiro_no_rows',
+    });
+  });
+
+  it('throws degiro_unsupported_country for an unknown ISIN prefix', async () => {
+    const csv = `Data,Hora,Produto,ISIN,Bolsa de referência,Bolsa,Quantidade,Preços,,Valor local,,Valor EUR,Taxa de Câmbio,Taxa Autofx,Custos de transação e/ou taxas de terceiros,Total EUR,ID da Ordem,
+01-01-2020,10:00,ETF,XX0000000001,EAM,XAMS,1,"10,0000",EUR,"-10,00",EUR,"-10,00",,"0,00",,"-10,00",,buy-1
+`;
+
+    const fakeFile = new File([csv], 'degiro.csv', { type: 'text/csv' });
+    await expect(parseDegiroTransactionsCsv(fakeFile)).rejects.toThrow(BrokerParsingError);
+    await expect(parseDegiroTransactionsCsv(fakeFile)).rejects.toMatchObject({
+      i18nKey: 'parser.error.degiro_unsupported_country',
+    });
+  });
+
+  it('throws degiro_wrong_file for empty CSV (headers only with no data)', async () => {
+    const csv = `Data,Hora,Produto,ISIN,Bolsa de referência,Bolsa,Quantidade,Preços,,Valor local,,Valor EUR,Taxa de Câmbio,Taxa Autofx,Custos de transação e/ou taxas de terceiros,Total EUR,ID da Ordem,
+`;
+
+    const fakeFile = new File([csv], 'degiro.csv', { type: 'text/csv' });
     await expect(parseDegiroTransactionsCsv(fakeFile)).rejects.toThrow(BrokerParsingError);
     await expect(parseDegiroTransactionsCsv(fakeFile)).rejects.toMatchObject({
       i18nKey: 'parser.error.degiro_wrong_file',

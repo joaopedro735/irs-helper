@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
-import type { ParsedPdfData, TaxRowG18A, TaxRowG1q7 } from '../types';
-import { BrokerParsingError } from './parserErrors';
+import type { ParsedPdfData, TaxRowG18A, TaxRowG1q7 } from '../../types';
+import { BrokerParsingError } from '../parserErrors';
 
 const REQUIRED_FIELDS: Array<keyof BinanceRow> = ['UTC_Time', 'Operation', 'Coin', 'Change'];
 
